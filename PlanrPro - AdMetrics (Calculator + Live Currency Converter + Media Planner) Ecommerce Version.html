@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PlanrPro — AdMetrics | E-Commerce Media Planner</title>
+  <!-- PWA Meta -->
+  <meta name="application-name" content="PlanrPro AdMetrics Ecom"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="PlanrPro Ecom"/>
+  <meta name="description" content="Agency-grade e-commerce media planning calculator with ROAS, AOV, Break-even, and full forecasting for Google & Meta Ads."/>
+  <meta name="theme-color" content="#0f172a"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      min-height:100vh;
+      background: linear-gradient(135deg,#0f172a,#1e1b4b,#0f172a);
+      font-family:'Segoe UI',sans-serif;
+      padding:20px;
+      display:flex; justify-content:center; align-items:flex-start;
+    }
+
+    .app-wrapper {
+      display:flex; flex-direction:column; align-items:center;
+      gap:14px; width:100%; max-width:500px;
+    }
+
+    /* ── BRAND HEADER ── */
+    .brand-header {
+      width:100%; display:flex; flex-direction:column;
+      align-items:center; gap:6px; padding:10px 0 4px;
+    }
+    .brand-logo { display:flex; align-items:center; gap:14px; }
+    .brand-wordmark { display:flex; flex-direction:column; gap:2px; }
+    .brand-name { font-size:22px; font-weight:800; letter-spacing:-0.3px; color:#fff; line-height:1; }
+    .brand-name span { color:#a78bfa; font-weight:400; }
+    .brand-tagline { font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:1.2px; text-transform:uppercase; }
+    .brand-edition {
+      display:inline-flex; align-items:center; gap:6px;
+      background:linear-gradient(135deg,#f59e0b,#ef4444);
+      padding:4px 12px; border-radius:20px;
+      font-size:10px; font-weight:700; color:#fff; letter-spacing:0.5px;
+      margin-top:2px;
+    }
+
+    /* ── TAB BAR ── */
+    .tab-bar {
+      display:flex; background:rgba(255,255,255,0.07);
+      border-radius:50px; padding:4px; width:100%; gap:4px;
+    }
+    .tab-btn {
+      flex:1; padding:9px 4px; border:none; border-radius:50px;
+      font-size:11px; font-weight:600; cursor:pointer;
+      background:transparent; color:rgba(255,255,255,0.45);
+      transition:all 0.25s; white-space:nowrap;
+    }
+    .tab-btn.active {
+      background:linear-gradient(135deg,#f59e0b,#ef4444);
+      color:#fff; box-shadow:0 4px 14px rgba(245,158,11,0.45);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background:rgba(255,255,255,0.05); backdrop-filter:blur(10px);
+      border-radius:24px; padding:22px;
+      box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+      width:100%; display:none;
+    }
+    .card.active { display:block; }
+
+    /* ── SECTION TITLES ── */
+    .sec-title {
+      text-align:center; font-size:20px; font-weight:800; color:#fff;
+      margin-bottom:4px;
+    }
+    .sec-title span { background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .sec-subtitle { text-align:center; color:rgba(255,255,255,0.35); font-size:11px; margin-bottom:18px; }
+
+    /* ── PLATFORM BAR ── */
+    .plat-bar { display:flex; gap:8px; margin-bottom:18px; }
+    .plat-btn {
+      flex:1; padding:10px 6px; border:none; border-radius:12px;
+      font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;
+      background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4);
+    }
+    .plat-btn.active { color:#fff; }
+    .plat-btn.google.active { background:linear-gradient(135deg,#4285f4,#34a853); box-shadow:0 4px 14px rgba(66,133,244,0.4); }
+    .plat-btn.meta.active   { background:linear-gradient(135deg,#1877f2,#e1306c); box-shadow:0 4px 14px rgba(24,119,242,0.4); }
+    .plat-btn.universal.active { background:linear-gradient(135deg,#f59e0b,#ef4444); box-shadow:0 4px 14px rgba(245,158,11,0.4); }
+
+    .plat-section { display:none; }
+    .plat-section.active { display:block; }
+
+    /* ── GROUP ── */
+    .grp {
+      background:rgba(0,0,0,0.2); border-radius:16px; padding:16px;
+      margin-bottom:14px; border:1px solid rgba(255,255,255,0.06);
+    }
+    .grp-title {
+      font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1px; color:rgba(255,255,255,0.4); margin-bottom:12px;
+      display:flex; align-items:center; gap:6px;
+    }
+    .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .d-blue{background:#4285f4;} .d-red{background:#ef4444;} .d-green{background:#10b981;}
+    .d-yellow{background:#f59e0b;} .d-purple{background:#8b5cf6;} .d-pink{background:#e1306c;}
+    .d-orange{background:#f97316;} .d-teal{background:#14b8a6;}
+
+    /* ── INPUT ROW ── */
+    .row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .row:last-child { margin-bottom:0; }
+    .lbl { flex:1; font-size:12px; color:rgba(255,255,255,0.6); line-height:1.3; }
+    .lbl small { display:block; color:rgba(255,255,255,0.25); font-size:10px; margin-top:1px; }
+    .inp {
+      width:130px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);
+      border-radius:10px; padding:8px 12px; color:#fff; font-size:13px; font-weight:600;
+      outline:none; text-align:right; transition:border-color 0.2s;
+    }
+    .inp:focus { border-color:rgba(245,158,11,0.6); background:rgba(245,158,11,0.08); }
+    .inp::placeholder { color:rgba(255,255,255,0.2); font-weight:400; }
+
+    /* ── OUTPUT ROW ── */
+    .out-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 12px; background:rgba(255,255,255,0.04);
+      border-radius:10px; margin-bottom:7px;
+    }
+    .out-row:last-child { margin-bottom:0; }
+    .out-lbl { font-size:12px; color:rgba(255,255,255,0.5); }
+    .out-lbl small { display:block; font-size:10px; color:rgba(255,255,255,0.25); margin-top:1px; font-style:italic; }
+    .ftag { font-size:10px; color:rgba(255,255,255,0.2); margin-top:3px; font-family:monospace; display:block; }
+    .out-val { font-size:15px; font-weight:700; color:#fff; text-align:right; }
+    .out-val.hi  { color:#10b981; font-size:18px; }
+    .out-val.warn{ color:#f59e0b; font-size:18px; }
+    .out-val.danger{ color:#ef4444; }
+    .out-val.info { color:#a78bfa; }
+
+    /* ── HINT ── */
+    .hint {
+      text-align:center; padding:12px; color:rgba(255,255,255,0.3);
+      font-size:12px; background:rgba(255,255,255,0.03);
+      border-radius:10px; margin-bottom:8px;
+    }
+
+    /* ── EXAMPLE BTN ── */
+    .ex-btn {
+      margin-left:auto; padding:4px 10px; border:none; border-radius:20px;
+      background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff;
+      font-size:10px; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+    }
+    .ex-btn:hover { opacity:0.82; }
+
+    /* ── RESET BTN ── */
+    .reset-btn {
+      width:100%; padding:9px; border:none; border-radius:12px;
+      background:rgba(239,68,68,0.15); color:rgba(255,100,100,0.8);
+      font-size:12px; font-weight:600; cursor:pointer; margin-top:6px;
+      transition:background 0.2s;
+    }
+    .reset-btn:hover { background:rgba(239,68,68,0.28); }
+
+    /* ── DIVIDER ── */
+    .dvdr { border:none; border-top:1px solid rgba(255,255,255,0.07); margin:12px 0; }
+
+    /* ── SCENARIO TABLE ── */
+    .scen-tbl { width:100%; border-collapse:collapse; margin-top:12px; font-size:11px; }
+    .scen-tbl th {
+      background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5);
+      padding:8px 8px; text-align:center; font-weight:700; font-size:10px;
+      text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .scen-tbl th:first-child { text-align:left; }
+    .scen-tbl td {
+      padding:8px 8px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.05);
+      font-weight:600; color:#fff;
+    }
+    .scen-tbl td:first-child { text-align:left; color:rgba(255,255,255,0.6); font-weight:400; }
+    .scen-tbl tr.cons td { color:#ef4444; }
+    .scen-tbl tr.base td { color:#10b981; }
+    .scen-tbl tr.opti td { color:#6366f1; }
+    .scen-tbl tr.cons td:first-child,
+    .scen-tbl tr.base td:first-child,
+    .scen-tbl tr.opti td:first-child { color:rgba(255,255,255,0.6); }
+
+    /* ── KPI BADGE ── */
+    .kbadge {
+      display:inline-block; padding:2px 8px; border-radius:20px;
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .kgood { background:rgba(16,185,129,0.2); color:#10b981; }
+    .kwarn { background:rgba(245,158,11,0.2); color:#f59e0b; }
+    .kbad  { background:rgba(239,68,68,0.2); color:#ef4444; }
+
+    /* ── GUIDE BOX ── */
+    .guide {
+      background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+      border-radius:14px; padding:12px 14px; margin-bottom:16px;
+    }
+    .guide-title { font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:6px; }
+    .guide-body { font-size:11px; color:rgba(255,255,255,0.45); line-height:1.7; }
+    .guide-body b { color:rgba(255,255,255,0.8); }
+
+    /* ── LEARN STYLES ── */
+    #tab-learn { overflow:visible; }
+    .learn-header { text-align:center; margin-bottom:16px; }
+    .learn-header h2 { font-size:20px; font-weight:800; color:#fff; margin-bottom:4px; }
+    .learn-header h2 span { background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .learn-header p { font-size:11px; color:rgba(255,255,255,0.35); }
+
+    .lsub-bar { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+    .lsub-btn {
+      padding:6px 11px; border:none; border-radius:20px; font-size:11px; font-weight:600;
+      cursor:pointer; background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4);
+      transition:all 0.2s; white-space:nowrap;
+    }
+    .lsub-btn.active { background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; box-shadow:0 3px 10px rgba(245,158,11,0.4); }
+    .lsub-btn:hover:not(.active) { background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); }
+
+    .lsec { display:none; }
+    .lsec.active { display:block; }
+
+    .lcard {
+      background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.06);
+      border-radius:16px; padding:16px; margin-bottom:14px;
+    }
+    .lcard-title {
+      font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      color:rgba(255,255,255,0.45); margin-bottom:12px;
+      display:flex; align-items:center; gap:7px;
+    }
+    .licon { font-size:16px; }
+
+    .lp { font-size:12px; color:rgba(255,255,255,0.55); line-height:1.75; margin-bottom:10px; }
+    .lp:last-child { margin-bottom:0; }
+    .lp b, .lp strong { color:rgba(255,255,255,0.85); }
+    .lp em { color:#f59e0b; font-style:normal; font-weight:600; }
+
+    .lbox {
+      background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+      border-radius:12px; padding:12px 14px; margin:10px 0;
+      font-size:12px; color:rgba(255,255,255,0.6); line-height:1.7;
+    }
+    .lbox.green { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.25); }
+    .lbox.red   { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.2); }
+    .lbox.blue  { background:rgba(99,102,241,0.1);  border-color:rgba(99,102,241,0.25); }
+    .lbox b { color:#fff; }
+
+    .lref-tbl { width:100%; border-collapse:collapse; font-size:11px; margin:8px 0; }
+    .lref-tbl th { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.45); padding:7px 8px; text-align:left; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; }
+    .lref-tbl td { padding:7px 8px; color:rgba(255,255,255,0.6); border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:top; line-height:1.5; }
+    .lref-tbl td:first-child { color:#f59e0b; font-weight:700; white-space:nowrap; }
+    .lref-tbl td:nth-child(3) { color:#10b981; font-weight:600; }
+
+    .fblock { background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 14px; margin:8px 0; font-family:monospace; font-size:12px; }
+    .fline { color:#10b981; margin-bottom:4px; }
+    .fline:last-child { margin-bottom:0; }
+    .fline .fc { color:rgba(255,255,255,0.3); }
+    .flabel { font-size:10px; color:rgba(255,255,255,0.35); font-family:'Segoe UI',sans-serif; margin-bottom:8px; }
+
+    .step-list { list-style:none; padding:0; margin:10px 0; }
+    .step-list li { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px; color:rgba(255,255,255,0.55); line-height:1.6; }
+    .step-list li:last-child { border-bottom:none; }
+    .snum { min-width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .step-list li b { color:rgba(255,255,255,0.85); display:block; margin-bottom:2px; }
+
+    .grd2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0; }
+    .sc { background:rgba(255,255,255,0.05); border-radius:10px; padding:10px 12px; }
+    .sc .sc-n { font-size:11px; font-weight:700; color:#fff; margin-bottom:4px; }
+    .sc .sc-d { font-size:10px; color:rgba(255,255,255,0.4); line-height:1.5; }
+    .sc .sc-v { font-size:10px; color:#f59e0b; margin-top:4px; font-weight:600; }
+
+    .term-grid { display:flex; flex-direction:column; gap:6px; }
+    .term-row { display:flex; align-items:baseline; gap:10px; padding:8px 12px; background:rgba(255,255,255,0.04); border-radius:10px; font-size:12px; }
+    .tk { color:#f59e0b; font-weight:800; min-width:60px; font-size:11px; flex-shrink:0; }
+    .td_ { color:rgba(255,255,255,0.65); font-size:11px; }
+
+    /* ── BRAND FOOTER ── */
+    .brand-footer {
+      width:100%; max-width:500px; text-align:center;
+      padding:18px 0 8px; border-top:1px solid rgba(255,255,255,0.06); margin-top:6px;
+    }
+    .bf-built { font-size:11px; color:rgba(255,255,255,0.25); margin-bottom:6px; }
+    .bf-author { font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:4px; }
+    .bf-role { font-size:11px; color:rgba(255,255,255,0.35); margin-bottom:8px; }
+    a.bf-li {
+      display:inline-flex; align-items:center; gap:6px; padding:7px 16px;
+      background:rgba(10,102,194,0.2); border:1px solid rgba(10,102,194,0.4);
+      border-radius:20px; color:#60a5fa; font-size:11px; font-weight:600;
+      text-decoration:none; transition:all 0.2s;
+    }
+    a.bf-li:hover { background:rgba(10,102,194,0.35); color:#93c5fd; }
+    .bf-copy { font-size:10px; color:rgba(255,255,255,0.15); margin-top:10px; }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- BRAND HEADER -->
+  <div class="brand-header">
+    <div class="brand-logo">
+      <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#ef4444"/></linearGradient>
+          <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+          <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+          <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+          <linearGradient id="ga" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+          <linearGradient id="gc" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+        </defs>
+        <rect x="2"  y="2"  width="22" height="22" rx="5" fill="url(#g1)"/>
+        <rect x="28" y="2"  width="22" height="22" rx="5" fill="url(#g2)"/>
+        <rect x="2"  y="28" width="22" height="22" rx="5" fill="url(#g3)"/>
+        <rect x="28" y="28" width="22" height="22" rx="5" fill="url(#g4)"/>
+        <polyline points="4,44 14,32 22,40 30,30 40,44" fill="none" stroke="url(#gc)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+        <line x1="26" y1="38" x2="42" y2="8" stroke="url(#ga)" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="42,8 34,10 40,16" fill="url(#ga)"/>
+      </svg>
+      <div class="brand-wordmark">
+        <div class="brand-name">PlanrPro <span>— AdMetrics</span></div>
+        <div class="brand-tagline">E-Commerce Media Planner</div>
+        <div class="brand-edition">🛒 E-Commerce Edition</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('google')">🔵 Google</button>
+    <button class="tab-btn"        onclick="switchTab('meta')">🔴 Meta</button>
+    <button class="tab-btn"        onclick="switchTab('universal')">🟡 Universal</button>
+    <button class="tab-btn"        onclick="switchTab('learn')">📚 Learn</button>
+  </div>
+
+  <!-- ══════ GOOGLE ADS ══════ -->
+  <div class="card active" id="tab-google">
+    <div class="sec-title">🔵 <span>Google Ads</span> Forecast</div>
+    <div class="sec-subtitle">Search + Shopping campaigns · E-Commerce focus</div>
+
+    <div class="guide">
+      <div class="guide-title">📖 How to Use Google Ads Planner</div>
+      <div class="guide-body">
+        Enter your <b>Budget, CPC, CTR, CVR &amp; AOV</b> → results appear instantly.<br/>
+        Click <b>⚡ Load Example</b> to see a working Fashion e-commerce scenario.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-blue"></span> Inputs
+        <button class="ex-btn" onclick="loadGoogleEx()">⚡ Load Example</button>
+      </div>
+      <div class="row"><div class="lbl">Monthly Budget (₹)<small>Total Google Ads spend</small></div>
+        <input class="inp" id="g-budget" type="number" placeholder="e.g. 100000" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">Avg. CPC (₹)<small>₹8–₹45 typical India e-com</small></div>
+        <input class="inp" id="g-cpc" type="number" placeholder="e.g. 18" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">CTR (%)<small>Search: 4–8% · Shopping: 0.8–2%</small></div>
+        <input class="inp" id="g-ctr" type="number" placeholder="e.g. 5.5" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">CVR — Purchase Rate (%)<small>Industry avg: 2–4% e-com</small></div>
+        <input class="inp" id="g-cvr" type="number" placeholder="e.g. 3.2" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)<small>Average cart value per purchase</small></div>
+        <input class="inp" id="g-aov" type="number" placeholder="e.g. 1800" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue minus COGS · e.g. 45%</small></div>
+        <input class="inp" id="g-margin" type="number" placeholder="e.g. 45" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">Return Rate (%)<small>% of orders returned · optional</small></div>
+        <input class="inp" id="g-return" type="number" placeholder="e.g. 8" oninput="calcGoogle()"/></div>
+      <div class="row"><div class="lbl">Quality Score (1–10)<small>optional</small></div>
+        <input class="inp" id="g-qs" type="number" placeholder="e.g. 7" min="1" max="10" oninput="calcGoogle()"/></div>
+      <button class="reset-btn" onclick="resetGoogle()">↺ Reset</button>
+    </div>
+
+    <!-- Outputs always visible -->
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-green"></span> Forecast Output</div>
+      <div class="hint" id="g-hint">👆 Enter Budget + CPC + CTR + CVR + AOV to see your forecast</div>
+      <div id="g-results">
+        <div class="out-row"><div class="out-lbl">Clicks<span class="ftag">Budget ÷ CPC</span></div><div class="out-val" id="g-clicks">—</div></div>
+        <div class="out-row"><div class="out-lbl">Impressions<span class="ftag">Clicks ÷ CTR</span></div><div class="out-val" id="g-impr">—</div></div>
+        <div class="out-row"><div class="out-lbl">Purchases (Orders)<span class="ftag">Clicks × CVR</span></div><div class="out-val hi" id="g-orders">—</div></div>
+        <div class="out-row"><div class="out-lbl">Revenue Generated (₹)<span class="ftag">Orders × AOV</span></div><div class="out-val hi" id="g-revenue">—</div></div>
+        <div class="out-row"><div class="out-lbl">ROAS<span class="ftag">Revenue ÷ Ad Spend</span></div><div class="out-val warn" id="g-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">CPA — Cost Per Purchase (₹)<span class="ftag">Budget ÷ Orders</span></div><div class="out-val" id="g-cpa">—</div></div>
+        <div class="out-row"><div class="out-lbl">Break-even ROAS<span class="ftag">1 ÷ Gross Margin%</span></div><div class="out-val info" id="g-be-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">Gross Profit after Ads (₹)<span class="ftag">(Revenue × Margin%) − Budget</span></div><div class="out-val" id="g-profit">—</div></div>
+        <div class="out-row"><div class="out-lbl">Net Revenue (after returns, ₹)<span class="ftag">Revenue × (1 − Return Rate)</span></div><div class="out-val" id="g-net-rev">—</div></div>
+        <div class="out-row"><div class="out-lbl">MER — Marketing Efficiency Ratio<span class="ftag">Ad Spend ÷ Revenue × 100</span></div><div class="out-val" id="g-mer">—</div></div>
+
+        <hr class="dvdr"/>
+        <div class="grp-title" style="margin-bottom:8px;"><span class="dot d-purple"></span> KPI Health Check</div>
+        <div class="out-row"><div class="out-lbl">CTR Health<small>Search: 4–8% · Shopping: 0.8–2%</small></div><div class="out-val" id="g-kpi-ctr">—</div></div>
+        <div class="out-row"><div class="out-lbl">CVR Health<small>E-com avg: 2–4%</small></div><div class="out-val" id="g-kpi-cvr">—</div></div>
+        <div class="out-row"><div class="out-lbl">ROAS vs Break-even</div><div class="out-val" id="g-kpi-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">QS Health<small>6–7+ healthy</small></div><div class="out-val" id="g-kpi-qs">—</div></div>
+
+        <hr class="dvdr"/>
+        <div class="grp-title" style="margin-bottom:8px;"><span class="dot d-yellow"></span> 3-Scenario Stress Test</div>
+        <table class="scen-tbl">
+          <thead><tr><th>Scenario</th><th>CPC</th><th>CVR</th><th>Orders</th><th>ROAS</th></tr></thead>
+          <tbody>
+            <tr class="cons"><td>🔴 Conservative</td><td id="gs-cpc-c">—</td><td id="gs-cvr-c">—</td><td id="gs-ord-c">—</td><td id="gs-roas-c">—</td></tr>
+            <tr class="base"><td>🟢 Base</td>        <td id="gs-cpc-b">—</td><td id="gs-cvr-b">—</td><td id="gs-ord-b">—</td><td id="gs-roas-b">—</td></tr>
+            <tr class="opti"><td>🔵 Optimistic</td>  <td id="gs-cpc-o">—</td><td id="gs-cvr-o">—</td><td id="gs-ord-o">—</td><td id="gs-roas-o">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /tab-google -->
+
+  <!-- ══════ META ADS ══════ -->
+  <div class="card" id="tab-meta">
+    <div class="sec-title">🔴 <span>Meta Ads</span> Forecast</div>
+    <div class="sec-subtitle">Facebook + Instagram · E-Commerce focus</div>
+
+    <div class="guide">
+      <div class="guide-title">📖 How to Use Meta Ads Planner</div>
+      <div class="guide-body">
+        Enter <b>Budget, CPM, CTR &amp; Purchase CVR &amp; AOV</b> → instant results.<br/>
+        Meta e-com is CPM-based. Revenue flows from impressions → clicks → purchases.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-pink"></span> Inputs
+        <button class="ex-btn" onclick="loadMetaEx()">⚡ Load Example</button>
+      </div>
+      <div class="row"><div class="lbl">Monthly Budget (₹)<small>Total Meta spend</small></div>
+        <input class="inp" id="m-budget" type="number" placeholder="e.g. 80000" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">CPM (₹)<small>India e-com: ₹80–₹200 · Global ~$14–17</small></div>
+        <input class="inp" id="m-cpm" type="number" placeholder="e.g. 130" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">CTR — Link Click (%)<small>E-com avg: 1.5–2.5%</small></div>
+        <input class="inp" id="m-ctr" type="number" placeholder="e.g. 1.9" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Purchase CVR (%)<small>% of clicks that purchase · avg 1.6–2.7%</small></div>
+        <input class="inp" id="m-cvr" type="number" placeholder="e.g. 2.1" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)<small>Average cart value</small></div>
+        <input class="inp" id="m-aov" type="number" placeholder="e.g. 1500" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue minus COGS</small></div>
+        <input class="inp" id="m-margin" type="number" placeholder="e.g. 48" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Frequency<small>1.5–3.5× healthy · optional</small></div>
+        <input class="inp" id="m-freq" type="number" placeholder="e.g. 2.2" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Hook Rate (%)<small>% who watch 3s of video · 25–35%+ good · optional</small></div>
+        <input class="inp" id="m-hook" type="number" placeholder="e.g. 28" oninput="calcMeta()"/></div>
+      <div class="row"><div class="lbl">Return Rate (%)<small>optional</small></div>
+        <input class="inp" id="m-return" type="number" placeholder="e.g. 10" oninput="calcMeta()"/></div>
+      <button class="reset-btn" onclick="resetMeta()">↺ Reset</button>
+    </div>
+
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-green"></span> Forecast Output</div>
+      <div class="hint" id="m-hint">👆 Enter Budget + CPM + CTR + CVR + AOV to see your forecast</div>
+      <div id="m-results">
+        <div class="out-row"><div class="out-lbl">Impressions<span class="ftag">(Budget ÷ CPM) × 1,000</span></div><div class="out-val" id="m-impr">—</div></div>
+        <div class="out-row"><div class="out-lbl">Reach (Unique Users)<span class="ftag">Impressions ÷ Frequency</span></div><div class="out-val" id="m-reach">—</div></div>
+        <div class="out-row"><div class="out-lbl">Clicks<span class="ftag">Impressions × CTR</span></div><div class="out-val" id="m-clicks">—</div></div>
+        <div class="out-row"><div class="out-lbl">CPC (₹)<span class="ftag">CPM ÷ (CTR × 10)</span></div><div class="out-val" id="m-cpc">—</div></div>
+        <div class="out-row"><div class="out-lbl">Purchases (Orders)<span class="ftag">Clicks × Purchase CVR</span></div><div class="out-val hi" id="m-orders">—</div></div>
+        <div class="out-row"><div class="out-lbl">Revenue Generated (₹)<span class="ftag">Orders × AOV</span></div><div class="out-val hi" id="m-revenue">—</div></div>
+        <div class="out-row"><div class="out-lbl">ROAS<span class="ftag">Revenue ÷ Ad Spend</span></div><div class="out-val warn" id="m-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">CPA — Cost Per Purchase (₹)<span class="ftag">Budget ÷ Orders</span></div><div class="out-val" id="m-cpa">—</div></div>
+        <div class="out-row"><div class="out-lbl">Break-even ROAS<span class="ftag">1 ÷ Gross Margin%</span></div><div class="out-val info" id="m-be-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">Gross Profit after Ads (₹)<span class="ftag">(Revenue × Margin%) − Budget</span></div><div class="out-val" id="m-profit">—</div></div>
+        <div class="out-row"><div class="out-lbl">Net Revenue (after returns, ₹)</div><div class="out-val" id="m-net-rev">—</div></div>
+        <div class="out-row"><div class="out-lbl">eCPM (₹)<span class="ftag">(Spend ÷ Impressions) × 1,000</span></div><div class="out-val" id="m-ecpm">—</div></div>
+        <div class="out-row"><div class="out-lbl">Hook Rate Assessment<small>Video creative benchmark</small></div><div class="out-val" id="m-hook-kpi">—</div></div>
+
+        <hr class="dvdr"/>
+        <div class="grp-title" style="margin-bottom:8px;"><span class="dot d-purple"></span> KPI Health Check</div>
+        <div class="out-row"><div class="out-lbl">CPM Health<small>India e-com: ₹80–₹200</small></div><div class="out-val" id="m-kpi-cpm">—</div></div>
+        <div class="out-row"><div class="out-lbl">CTR Health<small>E-com: 1.5–2.5%+ good</small></div><div class="out-val" id="m-kpi-ctr">—</div></div>
+        <div class="out-row"><div class="out-lbl">Frequency Health<small>1.5–3.5× healthy</small></div><div class="out-val" id="m-kpi-freq">—</div></div>
+        <div class="out-row"><div class="out-lbl">ROAS vs Break-even</div><div class="out-val" id="m-kpi-roas">—</div></div>
+        <div class="out-row"><div class="out-lbl">CVR Health<small>E-com avg: 1.6–2.7%</small></div><div class="out-val" id="m-kpi-cvr">—</div></div>
+
+        <hr class="dvdr"/>
+        <div class="grp-title" style="margin-bottom:8px;"><span class="dot d-yellow"></span> 3-Scenario Stress Test</div>
+        <table class="scen-tbl">
+          <thead><tr><th>Scenario</th><th>CPM</th><th>CVR</th><th>Orders</th><th>ROAS</th></tr></thead>
+          <tbody>
+            <tr class="cons"><td>🔴 Conservative</td><td id="ms-cpm-c">—</td><td id="ms-cvr-c">—</td><td id="ms-ord-c">—</td><td id="ms-roas-c">—</td></tr>
+            <tr class="base"><td>🟢 Base</td>        <td id="ms-cpm-b">—</td><td id="ms-cvr-b">—</td><td id="ms-ord-b">—</td><td id="ms-roas-b">—</td></tr>
+            <tr class="opti"><td>🔵 Optimistic</td>  <td id="ms-cpm-o">—</td><td id="ms-cvr-o">—</td><td id="ms-ord-o">—</td><td id="ms-roas-o">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /tab-meta -->
+
+  <!-- ══════ UNIVERSAL ══════ -->
+  <div class="card" id="tab-universal">
+    <div class="sec-title">🟡 <span>Universal</span> Tools</div>
+    <div class="sec-subtitle">Break-even · Blended ROAS · AOV Optimiser · MER</div>
+
+    <!-- Break-even ROAS Calculator -->
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-orange"></span> Break-even ROAS Calculator
+        <button class="ex-btn" onclick="loadUniEx()">⚡ Load Example</button>
+      </div>
+      <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)</div>
+        <input class="inp" id="u-aov" type="number" placeholder="e.g. 1800" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue − COGS</small></div>
+        <input class="inp" id="u-margin" type="number" placeholder="e.g. 45" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Shipping + Fulfilment Cost (₹)<small>Per order · optional</small></div>
+        <input class="inp" id="u-shipping" type="number" placeholder="e.g. 80" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Payment Gateway Fee (%)<small>Typically 1.5–2.5% · optional</small></div>
+        <input class="inp" id="u-gateway" type="number" placeholder="e.g. 2" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Return Rate (%)<small>optional</small></div>
+        <input class="inp" id="u-return" type="number" placeholder="e.g. 8" oninput="calcUniversal()"/></div>
+      <div class="out-row" style="margin-top:10px;"><div class="out-lbl">Break-even ROAS<span class="ftag">1 ÷ (Gross Margin% − Shipping% − Gateway%)</span></div><div class="out-val warn" id="u-be-roas">—</div></div>
+      <div class="out-row"><div class="out-lbl">Max Allowable CPA (₹)<span class="ftag">AOV × Gross Margin% − Costs</span></div><div class="out-val" id="u-max-cpa">—</div></div>
+      <div class="out-row"><div class="out-lbl">Target Profitable ROAS<span class="ftag">Break-even ROAS × 1.3 (30% buffer)</span></div><div class="out-val hi" id="u-target-roas">—</div></div>
+      <div class="out-row"><div class="out-lbl">Contribution Margin / Order (₹)<span class="ftag">AOV × Margin% − Shipping − (AOV × Gateway%)</span></div><div class="out-val" id="u-cm">—</div></div>
+    </div>
+
+    <!-- Blended ROAS / MER Calculator -->
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-teal"></span> Blended ROAS / MER Calculator</div>
+      <div class="row"><div class="lbl">Total Monthly Revenue (₹)</div>
+        <input class="inp" id="u-total-rev" type="number" placeholder="e.g. 5000000" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Google Ads Spend (₹)</div>
+        <input class="inp" id="u-g-spend" type="number" placeholder="e.g. 100000" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Meta Ads Spend (₹)</div>
+        <input class="inp" id="u-m-spend" type="number" placeholder="e.g. 80000" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Other Marketing Spend (₹)<small>Influencer, email tools, etc.</small></div>
+        <input class="inp" id="u-other-spend" type="number" placeholder="e.g. 20000" oninput="calcUniversal()"/></div>
+      <div class="out-row" style="margin-top:10px;"><div class="out-lbl">Total Marketing Spend (₹)</div><div class="out-val" id="u-total-spend">—</div></div>
+      <div class="out-row"><div class="out-lbl">Blended ROAS / MER<span class="ftag">Total Revenue ÷ Total Marketing Spend</span></div><div class="out-val warn" id="u-blended-roas">—</div></div>
+      <div class="out-row"><div class="out-lbl">Marketing as % of Revenue<span class="ftag">Total Spend ÷ Revenue × 100</span></div><div class="out-val" id="u-mer-pct">—</div></div>
+      <div class="out-row"><div class="out-lbl">Blended ROAS Health</div><div class="out-val" id="u-blended-health">—</div></div>
+    </div>
+
+    <!-- AOV Optimiser -->
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-yellow"></span> AOV Optimiser — Impact of +₹ on ROAS</div>
+      <div class="row"><div class="lbl">Current AOV (₹)</div>
+        <input class="inp" id="u-cur-aov" type="number" placeholder="e.g. 1500" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Target AOV (₹)<small>e.g. with upsell/bundle</small></div>
+        <input class="inp" id="u-new-aov" type="number" placeholder="e.g. 1900" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Monthly Ad Spend (₹)</div>
+        <input class="inp" id="u-aov-spend" type="number" placeholder="e.g. 100000" oninput="calcUniversal()"/></div>
+      <div class="row"><div class="lbl">Monthly Orders</div>
+        <input class="inp" id="u-aov-orders" type="number" placeholder="e.g. 280" oninput="calcUniversal()"/></div>
+      <div class="out-row" style="margin-top:10px;"><div class="out-lbl">Current Revenue (₹)</div><div class="out-val" id="u-cur-rev">—</div></div>
+      <div class="out-row"><div class="out-lbl">New Revenue at Target AOV (₹)</div><div class="out-val hi" id="u-new-rev">—</div></div>
+      <div class="out-row"><div class="out-lbl">Current ROAS</div><div class="out-val" id="u-cur-roas">—</div></div>
+      <div class="out-row"><div class="out-lbl">New ROAS at Target AOV</div><div class="out-val hi" id="u-new-roas">—</div></div>
+      <div class="out-row"><div class="out-lbl">Extra Revenue per Month (₹)</div><div class="out-val hi" id="u-extra-rev">—</div></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetUniversal()" style="margin-top:4px;">↺ Reset Universal</button>
+  </div><!-- /tab-universal -->
+
+  <!-- ══════ LEARN TAB ══════ -->
+  <div class="card" id="tab-learn">
+    <div class="learn-header">
+      <h2>📚 <span>E-Commerce</span> Media Guide</h2>
+      <p>Agency-grade foundations for e-commerce media planning · 2025–26 benchmarks</p>
+    </div>
+
+    <div class="lsub-bar">
+      <button class="lsub-btn active" data-sub="foundations" onclick="switchLearn('foundations')">🏗 Foundations</button>
+      <button class="lsub-btn" data-sub="terms" onclick="switchLearn('terms')">📖 Glossary</button>
+      <button class="lsub-btn" data-sub="formulas" onclick="switchLearn('formulas')">🧮 Formulas</button>
+      <button class="lsub-btn" data-sub="benchmarks" onclick="switchLearn('benchmarks')">📊 Benchmarks</button>
+      <button class="lsub-btn" data-sub="forecasting" onclick="switchLearn('forecasting')">📈 Forecasting</button>
+      <button class="lsub-btn" data-sub="strategy" onclick="switchLearn('strategy')">🎯 Strategy</button>
+    </div>
+
+    <!-- FOUNDATIONS -->
+    <div class="lsec active" id="learn-foundations">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🛒</span> E-Commerce Media Planning — What's Different</div>
+        <p class="lp">E-commerce media planning is fundamentally different from lead generation. In lead gen, you optimise for <em>Cost Per Lead (CPL)</em>. In e-commerce, you optimise for <em>ROAS (Return on Ad Spend)</em> — and more importantly, your <em>Break-even ROAS</em> based on your margin structure.</p>
+        <div class="lbox">
+          <b>The core e-commerce equation:</b><br/>
+          Revenue = Budget ÷ CPC × CVR × AOV<br/>
+          ROAS = Revenue ÷ Ad Spend<br/>
+          Profitable only when: ROAS ≥ Break-even ROAS (= 1 ÷ Gross Margin)
+        </div>
+        <p class="lp">A <em>4x ROAS</em> sounds great — but means nothing without knowing your margin. A 4x ROAS with 20% gross margin is loss-making. A 4x ROAS with 60% gross margin is highly profitable.</p>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">⚖️</span> Platform Choice: Google vs Meta for E-Commerce</div>
+        <table class="lref-tbl">
+          <thead><tr><th>Factor</th><th>Google Ads</th><th>Meta Ads</th></tr></thead>
+          <tbody>
+            <tr><td>Primary intent</td><td>High — user is searching to buy</td><td>Low-mid — interruption-based</td></tr>
+            <tr><td>Best for</td><td>Branded, category, competitor keywords</td><td>Discovery, new audience, retargeting</td></tr>
+            <tr><td>Avg ROAS</td><td>4.5x (Google); 2.88x (Shopping)</td><td>2.2x median; 3.4–4x retargeting</td></tr>
+            <tr><td>India CPC range</td><td>₹8–₹45 e-com</td><td>₹10–₹30 e-com</td></tr>
+            <tr><td>India CPM range</td><td>N/A (CPC-based)</td><td>₹80–₹200 e-com</td></tr>
+            <tr><td>CVR typical</td><td>2–4% (search); 1–2% (shopping)</td><td>1.6–2.7% purchase CVR</td></tr>
+            <tr><td>AOV sensitivity</td><td>Higher — intent drives bigger baskets</td><td>Lower — impulse purchases more common</td></tr>
+          </tbody>
+        </table>
+        <div class="lbox blue">
+          <b>Strategy:</b> Use Google to capture demand (people searching to buy). Use Meta to CREATE demand (discovery, new audiences, DPA retargeting). Run both together for maximum funnel coverage.
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">📐</span> The E-Commerce Media Planning Framework</div>
+        <ul class="step-list">
+          <li><div class="snum">1</div><div><b>Know Your Unit Economics First</b>AOV, Gross Margin, COGS, Shipping costs, Return rate. Calculate your Break-even ROAS before spending a single rupee on ads.</div></li>
+          <li><div class="snum">2</div><div><b>Set Your Target ROAS</b>Target ROAS = Break-even ROAS × 1.3–1.5 (profit buffer). Google should run 20–30% above blended. Meta at or near blended.</div></li>
+          <li><div class="snum">3</div><div><b>Allocate Budget by Funnel Stage</b>Top of Funnel (Awareness): 20–30% · Mid Funnel (Consideration): 20–30% · Bottom of Funnel (Purchase/Retargeting): 40–60%</div></li>
+          <li><div class="snum">4</div><div><b>Use Platform-Appropriate KPIs</b>Google Search: ROAS + CVR + QS. Google Shopping: ROAS + CTR + conversion value. Meta: ROAS + Hook Rate + Frequency + Add-to-Cart rate.</div></li>
+          <li><div class="snum">5</div><div><b>Measure Blended ROAS / MER</b>Don't trust platform-reported ROAS (double counting). Use MER = Total Revenue ÷ Total Marketing Spend as your north star metric.</div></li>
+          <li><div class="snum">6</div><div><b>Optimise AOV Relentlessly</b>Every ₹100 increase in AOV at the same spend = ROAS improvement with zero extra cost. Bundles, upsells, free-shipping thresholds all raise AOV.</div></li>
+        </ul>
+      </div>
+    </div><!-- /foundations -->
+
+    <!-- GLOSSARY -->
+    <div class="lsec" id="learn-terms">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">📖</span> E-Commerce Specific Terms</div>
+        <div class="term-grid">
+          <div class="term-row"><span class="tk">ROAS</span><span class="td_">Return on Ad Spend — Revenue ÷ Ad Spend. The primary e-com efficiency metric.</span></div>
+          <div class="term-row"><span class="tk">AOV</span><span class="td_">Average Order Value — Total Revenue ÷ Total Orders. Higher AOV = better ROAS at same spend.</span></div>
+          <div class="term-row"><span class="tk">BE-ROAS</span><span class="td_">Break-even ROAS — 1 ÷ Gross Margin. The minimum ROAS to not lose money on ads.</span></div>
+          <div class="term-row"><span class="tk">CVR</span><span class="td_">Purchase Conversion Rate — % of clicks/sessions that complete a purchase. E-com avg: 2–4%.</span></div>
+          <div class="term-row"><span class="tk">CPA</span><span class="td_">Cost Per Acquisition/Purchase — Budget ÷ Orders. Should be below your max allowable CPA.</span></div>
+          <div class="term-row"><span class="tk">MER</span><span class="td_">Marketing Efficiency Ratio — Total Revenue ÷ Total Marketing Spend. The real blended ROAS.</span></div>
+          <div class="term-row"><span class="tk">COGS</span><span class="td_">Cost of Goods Sold — Direct cost of products sold. AOV − COGS = Gross Profit per order.</span></div>
+          <div class="term-row"><span class="tk">Gross Margin</span><span class="td_">(Revenue − COGS) ÷ Revenue × 100. Your margin before ad spend. Determines break-even ROAS.</span></div>
+          <div class="term-row"><span class="tk">DPA</span><span class="td_">Dynamic Product Ads (Meta) — Automatically shows users products they viewed/added to cart.</span></div>
+          <div class="term-row"><span class="tk">PMax</span><span class="td_">Performance Max (Google) — AI-driven campaign across all Google channels. Median ROAS: 2.57x.</span></div>
+          <div class="term-row"><span class="tk">Hook Rate</span><span class="td_">% of video viewers who watch first 3 seconds. Target: 25–35%+. Below 25% = creative not stopping scroll.</span></div>
+          <div class="term-row"><span class="tk">Add-to-Cart</span><span class="td_">% of visitors who add to cart. Industry avg: 5–8%. Key mid-funnel signal for retargeting.</span></div>
+          <div class="term-row"><span class="tk">Cart Abandon</span><span class="td_">% who add to cart but don't purchase. Industry avg: 70–75%. Retargeting these users is highest ROAS.</span></div>
+          <div class="term-row"><span class="tk">LTV / CLV</span><span class="td_">Customer Lifetime Value — Total revenue from a customer over time. Higher LTV = can afford higher CPA.</span></div>
+          <div class="term-row"><span class="tk">nCAC</span><span class="td_">New Customer Acquisition Cost — Cost to acquire a net-new customer. Critical for DTC scaling.</span></div>
+          <div class="term-row"><span class="tk">CPM</span><span class="td_">Cost Per 1,000 Impressions — Meta's primary pricing model. India e-com: ₹80–₹200.</span></div>
+        </div>
+      </div>
+    </div><!-- /terms -->
+
+    <!-- FORMULAS -->
+    <div class="lsec" id="learn-formulas">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔵</span> Google Ads E-Commerce Formula Chain</div>
+        <div class="fblock">
+          <div class="flabel">Start with budget → derive everything downward</div>
+          <div class="fline">Clicks      = Budget ÷ CPC<span class="fc">  e.g. ₹1,00,000 ÷ ₹18 = 5,556</span></div>
+          <div class="fline">Impressions = Clicks ÷ CTR<span class="fc">  e.g. 5,556 ÷ 0.055 = 1,01,018</span></div>
+          <div class="fline">Orders      = Clicks × CVR<span class="fc">  e.g. 5,556 × 0.032 = 178</span></div>
+          <div class="fline">Revenue     = Orders × AOV<span class="fc">  e.g. 178 × ₹1,800 = ₹3,20,400</span></div>
+          <div class="fline">ROAS        = Revenue ÷ Budget<span class="fc">  e.g. ₹3,20,400 ÷ ₹1,00,000 = 3.20x</span></div>
+          <div class="fline">CPA         = Budget ÷ Orders<span class="fc">  e.g. ₹1,00,000 ÷ 178 = ₹562</span></div>
+        </div>
+        <div class="fblock">
+          <div class="flabel">Profitability formulas</div>
+          <div class="fline">Break-even ROAS = 1 ÷ Gross Margin%<span class="fc">  e.g. 1 ÷ 0.45 = 2.22x</span></div>
+          <div class="fline">Max Allowable CPA = AOV × Margin%<span class="fc">  e.g. ₹1,800 × 0.45 = ₹810</span></div>
+          <div class="fline">Gross Profit = (Revenue × Margin%) − Budget<span class="fc">  e.g. (₹3,20,400 × 0.45) − ₹1,00,000 = ₹44,180</span></div>
+          <div class="fline">Net Revenue = Revenue × (1 − Return Rate)<span class="fc">  e.g. ₹3,20,400 × 0.92 = ₹2,94,768</span></div>
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔴</span> Meta Ads E-Commerce Formula Chain</div>
+        <div class="fblock">
+          <div class="flabel">CPM-based — start with budget → impressions</div>
+          <div class="fline">Impressions = (Budget ÷ CPM) × 1,000<span class="fc">  e.g. (₹80,000 ÷ ₹130) × 1,000 = 6,15,385</span></div>
+          <div class="fline">Clicks     = Impressions × CTR<span class="fc">  e.g. 6,15,385 × 0.019 = 11,692</span></div>
+          <div class="fline">Orders     = Clicks × Purchase CVR<span class="fc">  e.g. 11,692 × 0.021 = 246</span></div>
+          <div class="fline">Revenue    = Orders × AOV<span class="fc">  e.g. 246 × ₹1,500 = ₹3,68,880</span></div>
+          <div class="fline">ROAS       = Revenue ÷ Budget<span class="fc">  e.g. ₹3,68,880 ÷ ₹80,000 = 4.61x</span></div>
+          <div class="fline">CPC        = CPM ÷ (CTR × 10)<span class="fc">  e.g. ₹130 ÷ (1.9 × 10) = ₹6.84</span></div>
+          <div class="fline">Reach      = Impressions ÷ Frequency<span class="fc">  e.g. 6,15,385 ÷ 2.2 = 2,79,720</span></div>
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🟡</span> Universal E-Commerce Formulas</div>
+        <div class="fblock">
+          <div class="flabel">Unit economics & blended metrics</div>
+          <div class="fline">Break-even ROAS  = 1 ÷ Gross Margin%</div>
+          <div class="fline">Target ROAS      = Break-even ROAS × 1.3<span class="fc">  (30% profit buffer)</span></div>
+          <div class="fline">Max Allow. CPA   = AOV × Gross Margin% − Shipping − (AOV × Gateway%)</div>
+          <div class="fline">Blended ROAS/MER = Total Revenue ÷ Total Marketing Spend</div>
+          <div class="fline">MER %            = Total Marketing Spend ÷ Revenue × 100</div>
+          <div class="fline">Contribution Margin = AOV × Margin% − Shipping − (AOV × Gateway%) − CPA</div>
+          <div class="fline">AOV Improvement ROAS = (New AOV × Orders) ÷ Ad Spend</div>
+          <div class="fline">Cart Abandon Rate = (Add to Cart − Purchases) ÷ Add to Cart × 100</div>
+        </div>
+        <div class="lbox">
+          <b>⚡ ROAS Shortcut:</b> If your gross margin is M%, your break-even ROAS is <em>1 ÷ M</em>.<br/>
+          45% margin → BE-ROAS = 2.22x · 30% margin → BE-ROAS = 3.33x · 60% margin → BE-ROAS = 1.67x<br/>
+          <b>Always know your break-even before setting ROAS targets.</b>
+        </div>
+      </div>
+    </div><!-- /formulas -->
+
+    <!-- BENCHMARKS -->
+    <div class="lsec" id="learn-benchmarks">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔵</span> Google Ads — E-Commerce Benchmarks 2025–26</div>
+        <table class="lref-tbl">
+          <thead><tr><th>Metric</th><th>Search Ads</th><th>Shopping Ads</th><th>PMax</th></tr></thead>
+          <tbody>
+            <tr><td>CTR</td><td>4–8% (avg 5.5%)</td><td>0.8–2% (avg 1.2%)</td><td>Blended ~1.5%</td></tr>
+            <tr><td>CPC (India ₹)</td><td>₹8–₹35</td><td>₹5–₹18</td><td>₹8–₹25</td></tr>
+            <tr><td>CVR</td><td>2–4% (avg 3.2%)</td><td>1–2.5%</td><td>1.5–3%</td></tr>
+            <tr><td>ROAS</td><td>4.5x avg (5.17 median)</td><td>2.88x median</td><td>2.57x median</td></tr>
+            <tr><td>Quality Score</td><td>6–7/10 healthy</td><td>N/A</td><td>N/A</td></tr>
+          </tbody>
+        </table>
+        <div class="lbox">
+          <b>Source:</b> Triple Whale (2025, $87M+ spend analysis) · OwlClaw India Benchmarks 2026 · Focus Digital ROAS Report 2025 · PPCChief Industry Data 2026
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔴</span> Meta Ads — E-Commerce Benchmarks 2025–26</div>
+        <table class="lref-tbl">
+          <thead><tr><th>Metric</th><th>Global Avg</th><th>India E-Com</th><th>Top Quartile</th></tr></thead>
+          <tbody>
+            <tr><td>CPM</td><td>$14–$17 (~₹1,165–₹1,400)</td><td>₹80–₹200</td><td>Depends on audience</td></tr>
+            <tr><td>CTR (Link)</td><td>1.93–2.19%</td><td>1.5–2.5%</td><td>3%+</td></tr>
+            <tr><td>CPC (India ₹)</td><td>$0.87 (~₹72)</td><td>₹8–₹30</td><td>₹5–₹12</td></tr>
+            <tr><td>Purchase CVR</td><td>1.6–2.7%</td><td>1.5–2.5%</td><td>3%+</td></tr>
+            <tr><td>ROAS (median)</td><td>1.93x</td><td>2–4x</td><td>4–8x retargeting</td></tr>
+            <tr><td>Hook Rate</td><td>Target 25–35%+</td><td>Same</td><td>35%+</td></tr>
+            <tr><td>Frequency</td><td>1.5–3.5x healthy</td><td>Same</td><td>&lt;3x prospecting</td></tr>
+          </tbody>
+        </table>
+        <p class="lp" style="margin-top:8px;"><em>Note:</em> India CPMs are 80–85% lower than global averages, making India one of the most cost-efficient markets for Meta e-commerce advertising. <strong>Source:</strong> MHI Growth Engine 2026 · Triple Whale 2025 · OwlClaw India 2026</p>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">📌</span> India E-Commerce Quick Reference (2025–26)</div>
+        <table class="lref-tbl">
+          <thead><tr><th>Category</th><th>Google CPC (₹)</th><th>Meta CPM (₹)</th><th>Avg CVR</th><th>Target ROAS</th></tr></thead>
+          <tbody>
+            <tr><td>Fashion / Apparel</td><td>₹8–₹22</td><td>₹90–₹160</td><td>1.5–2.5%</td><td>2.5–4x</td></tr>
+            <tr><td>Beauty / Cosmetics</td><td>₹12–₹35</td><td>₹100–₹180</td><td>2–3.5%</td><td>3–5x</td></tr>
+            <tr><td>Electronics / Tech</td><td>₹18–₹45</td><td>₹120–₹200</td><td>1–2%</td><td>4–6x</td></tr>
+            <tr><td>Home & Decor</td><td>₹10–₹28</td><td>₹80–₹150</td><td>1.5–3%</td><td>2.5–4x</td></tr>
+            <tr><td>Health / Wellness</td><td>₹15–₹40</td><td>₹100–₹170</td><td>2–4%</td><td>3–5x</td></tr>
+            <tr><td>Baby / Kids</td><td>₹10–₹25</td><td>₹85–₹150</td><td>2.5–4%</td><td>3–5x</td></tr>
+            <tr><td>Food & Grocery</td><td>₹5–₹15</td><td>₹70–₹130</td><td>3–5%</td><td>2–3x</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /benchmarks -->
+
+    <!-- FORECASTING -->
+    <div class="lsec" id="learn-forecasting">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">📈</span> E-Commerce Forecasting — The Right Approach</div>
+        <p class="lp">E-commerce forecasting is more complex than lead gen because your profitability depends on <em>margin</em>, <em>AOV</em>, <em>return rates</em>, and <em>LTV</em> — not just a CPL target. Always start with unit economics, never with channel metrics.</p>
+        <div class="lbox red">
+          <b>❌ Wrong approach:</b> "We'll spend ₹1L and get a 4x ROAS."<br/>
+          No margin context. No break-even calculation. No AOV assumption. Dangerously incomplete.
+        </div>
+        <div class="lbox green">
+          <b>✅ Right approach:</b> "Our AOV is ₹1,800, gross margin is 45%. Break-even ROAS = 2.22x. We need target ROAS of 2.89x (30% buffer). At ₹1L budget, ₹18 CPC, 5.5% CTR, 3.2% CVR → 178 orders × ₹1,800 = ₹3.2L revenue = 3.2x ROAS ✓ Profitable."
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔵</span> Google Ads Worked Example — Fashion Brand</div>
+        <p class="lp">Search campaign, Delhi + Mumbai, Month 1 · Budget = ₹1,00,000 · AOV = ₹1,800 · Margin = 45%</p>
+        <div class="fblock">
+          <div class="fline">Break-even ROAS = 1 ÷ 0.45                = <strong style="color:#f59e0b">2.22x</strong></div>
+          <div class="fline">Target ROAS     = 2.22 × 1.30              = <strong style="color:#f59e0b">2.89x (floor)</strong></div>
+          <div class="fline">Clicks     = ₹1,00,000 ÷ ₹18 (CPC)        = <strong style="color:#10b981">5,556</strong></div>
+          <div class="fline">Impressions = 5,556 ÷ 0.055 (CTR)          = <strong style="color:#10b981">1,01,018</strong></div>
+          <div class="fline">Orders     = 5,556 × 0.032 (CVR)           = <strong style="color:#10b981">178</strong></div>
+          <div class="fline">Revenue    = 178 × ₹1,800 (AOV)            = <strong style="color:#10b981">₹3,20,400</strong></div>
+          <div class="fline">ROAS       = ₹3,20,400 ÷ ₹1,00,000         = <strong style="color:#10b981">3.20x ✓ Profitable</strong></div>
+          <div class="fline">CPA        = ₹1,00,000 ÷ 178               = <strong style="color:#a78bfa">₹562</strong></div>
+          <div class="fline">Gross Profit= (₹3,20,400×0.45) − ₹1,00,000 = <strong style="color:#10b981">₹44,180 profit</strong></div>
+        </div>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">⚠️</span> 3-Scenario Stress Test — E-Commerce Standard</div>
+        <table class="lref-tbl">
+          <thead><tr><th>Scenario</th><th>CPC/CPM</th><th>CVR</th><th>ROAS Likely</th><th>When to use</th></tr></thead>
+          <tbody>
+            <tr><td>🔴 Conservative</td><td>+20% above benchmark</td><td>−20% below avg</td><td>Often near BE-ROAS</td><td>New account, cold audiences, Q1</td></tr>
+            <tr><td>🟢 Base</td><td>Mid-range benchmarks</td><td>Mid-range CVR</td><td>Benchmark ROAS</td><td>M2–M3 with data, warm audiences</td></tr>
+            <tr><td>🔵 Optimistic</td><td>−15% below benchmark</td><td>+20% above avg</td><td>1.5–2x BE-ROAS</td><td>Peak season, retargeting, M4+</td></tr>
+          </tbody>
+        </table>
+        <div class="lbox">
+          <b>Key e-com sensitivity:</b> A 10% drop in CVR hurts ROAS by 10%. A ₹100 increase in AOV improves ROAS by (₹100 × orders ÷ budget)x — often 0.1–0.3x ROAS improvement with zero extra spend.
+        </div>
+      </div>
+    </div><!-- /forecasting -->
+
+    <!-- STRATEGY -->
+    <div class="lsec" id="learn-strategy">
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🎯</span> E-Commerce Campaign Strategy Framework</div>
+        <ul class="step-list">
+          <li><div class="snum">1</div><div><b>Prospecting (Top of Funnel) — 30–40% of budget</b>Google: Broad match + PMAX · Meta: Lookalike audiences (1–5%), Interest targeting, Advantage+ Shopping. Goal: build retargeting pools profitably.</div></li>
+          <li><div class="snum">2</div><div><b>Retargeting (Bottom of Funnel) — 40–50% of budget</b>Google: Remarketing lists (RLSA), Dynamic Remarketing · Meta: Dynamic Product Ads (DPA) — product viewers, add-to-cart abandoners, checkout abandoners. Highest ROAS in the funnel (3–6x).</div></li>
+          <li><div class="snum">3</div><div><b>Branded + Competitor (10–20% of budget)</b>Google: Brand keywords (lowest CPC, highest CVR) · Competitor brand terms. Never ignore branded — it's the highest ROAS campaign you'll run.</div></li>
+          <li><div class="snum">4</div><div><b>Seasonal Budget Shifting</b>India e-com peaks: Diwali (Oct), Dussehra, Big Billion Days, Republic Day, Women's Day. Increase budgets 2–3x. Reduce ROAS targets 10–15% to allow volume growth.</div></li>
+          <li><div class="snum">5</div><div><b>Creative Strategy for Meta</b>Hook rate is king — first 3 seconds determine everything. UGC testimonials drive 2.4x higher CVR than product-only ads. Rotate creatives every 2–3 weeks to prevent fatigue (Frequency &gt; 3.5x = creative burnout).</div></li>
+          <li><div class="snum">6</div><div><b>AOV Maximisation</b>Free shipping above threshold (e.g., ₹999+), product bundles, upsells at checkout, cross-sell in post-purchase emails. Every ₹100 AOV improvement at 5,000 orders/month = ₹5L extra revenue with zero ad spend increase.</div></li>
+        </ul>
+      </div>
+
+      <div class="lcard">
+        <div class="lcard-title"><span class="licon">🔍</span> Where to Source E-Commerce Benchmarks</div>
+        <div class="grd2">
+          <div class="sc"><div class="sc-n">🔵 Google Keyword Planner</div><div class="sc-d">CPC ranges for product keywords by category</div><div class="sc-v">→ Google Search/Shopping CPC</div></div>
+          <div class="sc"><div class="sc-n">🐋 Triple Whale</div><div class="sc-d">Industry ROAS, CVR, AOV benchmarks across 35,000+ e-com brands</div><div class="sc-v">→ Most accurate e-com data</div></div>
+          <div class="sc"><div class="sc-n">🔴 Meta Ads Manager</div><div class="sc-d">Audience size, estimated CPM for your targeting</div><div class="sc-v">→ Meta CPM/reach estimates</div></div>
+          <div class="sc"><div class="sc-n">📊 MHI Growth Engine</div><div class="sc-d">Meta e-com benchmarks by vertical, $87M+ spend analysis</div><div class="sc-v">→ Meta e-com 2026 benchmarks</div></div>
+          <div class="sc"><div class="sc-n">📁 Your Own Data</div><div class="sc-d">Historical CVR, AOV, ROAS from your ad account — most accurate</div><div class="sc-v">→ Month 2+ planning</div></div>
+          <div class="sc"><div class="sc-n">🌐 OwlClaw India 2026</div><div class="sc-d">India-specific PPC + Meta benchmarks by industry</div><div class="sc-v">→ India-specific data</div></div>
+        </div>
+      </div>
+    </div><!-- /strategy -->
+  </div><!-- /tab-learn -->
+
+  <!-- BRAND FOOTER -->
+  <div class="brand-footer">
+    <div class="bf-built">Built by</div>
+    <div class="bf-author">Debanjan Das</div>
+    <div class="bf-role">Performance Marketer · Google &amp; Meta Ads Specialist</div>
+    <a class="bf-li" href="https://www.linkedin.com/in/debanjan-das-performance-marketer" target="_blank" rel="noopener noreferrer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      Connect on LinkedIn
+    </a>
+    <div class="bf-copy">© 2026 PlanrPro — AdMetrics E-Commerce Edition · All rights reserved</div>
+  </div>
+
+</div><!-- /app-wrapper -->
+
+<script>
+// ══════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = {google:0, meta:1, universal:2, learn:3}[tab];
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+function switchLearn(sub) {
+  document.querySelectorAll('.lsec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.lsub-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('learn-' + sub).classList.add('active');
+  document.querySelector('.lsub-btn[data-sub="' + sub + '"]').classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function f(id) { return parseFloat(document.getElementById(id).value); }
+function fmtN(n, d=0) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+function fmtRs(n, d=0) { if (!isFinite(n)||isNaN(n)) return '—'; return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+function fmtPct(n, d=2) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toFixed(d)+'%'; }
+function fmtX(n, d=2) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toFixed(d)+'x'; }
+
+function setV(id, text, cls='') {
+  const el = document.getElementById(id); if (!el) return;
+  el.textContent = text;
+  el.className = 'out-val' + (cls ? ' '+cls : '');
+}
+function setBadge(id, text, b) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = text + ' ' + b;
+}
+function badge(isGood, isWarn) {
+  if (isGood) return '<span class="kbadge kgood">✓ Good</span>';
+  if (isWarn) return '<span class="kbadge kwarn">⚠ Watch</span>';
+  return '<span class="kbadge kbad">✗ Poor</span>';
+}
+function setField(id, val) { const el=document.getElementById(id); if(el) el.value=val; }
+
+// ══════════════════════════════════════════════
+//  GOOGLE ADS E-COMMERCE
+// ══════════════════════════════════════════════
+function calcGoogle() {
+  const budget = f('g-budget'), cpc = f('g-cpc'), ctr = f('g-ctr');
+  const cvr = f('g-cvr'), aov = f('g-aov'), margin = f('g-margin');
+  const returnRate = f('g-return'), qs = f('g-qs');
+
+  const hint = document.getElementById('g-hint');
+  const hasCore = !isNaN(budget)&&!isNaN(cpc)&&!isNaN(ctr)&&!isNaN(cvr)&&!isNaN(aov)&&budget>0&&cpc>0&&ctr>0&&cvr>0&&aov>0;
+
+  if (!hasCore) {
+    hint.style.display = 'block';
+    ['g-clicks','g-impr','g-orders','g-revenue','g-roas','g-cpa','g-be-roas',
+     'g-profit','g-net-rev','g-mer','g-kpi-ctr','g-kpi-cvr','g-kpi-roas','g-kpi-qs',
+     'gs-cpc-c','gs-cvr-c','gs-ord-c','gs-roas-c',
+     'gs-cpc-b','gs-cvr-b','gs-ord-b','gs-roas-b',
+     'gs-cpc-o','gs-cvr-o','gs-ord-o','gs-roas-o'].forEach(id => setV(id, '—'));
+    return;
+  }
+  hint.style.display = 'none';
+
+  // Core formula chain
+  const clicks      = budget / cpc;
+  const impressions = clicks / (ctr / 100);
+  const orders      = clicks * (cvr / 100);
+  const revenue     = orders * aov;
+  const roas        = revenue / budget;
+  const cpa         = budget / orders;
+  const beRoas      = !isNaN(margin)&&margin>0 ? 1 / (margin/100) : NaN;
+  const targetRoas  = !isNaN(beRoas) ? beRoas * 1.3 : NaN;
+  const grossProfit = !isNaN(margin) ? (revenue * margin/100) - budget : NaN;
+  const netRev      = !isNaN(returnRate)&&returnRate>0 ? revenue * (1 - returnRate/100) : revenue;
+  const mer         = (budget / revenue) * 100;
+
+  setV('g-clicks',  fmtN(clicks, 0));
+  setV('g-impr',    fmtN(impressions, 0));
+  setV('g-orders',  fmtN(orders, 0), 'hi');
+  setV('g-revenue', fmtRs(revenue), 'hi');
+  setV('g-roas',    fmtX(roas), roas >= (isNaN(beRoas)?2.2:beRoas) ? 'warn' : 'danger');
+  setV('g-cpa',     fmtRs(cpa));
+  setV('g-be-roas', isNaN(beRoas) ? '— (enter margin)' : fmtX(beRoas) + ' (min)', 'info');
+  setV('g-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtRs(grossProfit), grossProfit >= 0 ? 'hi' : 'danger');
+  setV('g-net-rev', fmtRs(netRev));
+  setV('g-mer',     fmtPct(mer, 1));
+
+  // KPI Health
+  const ctrGood = ctr >= 4 && ctr <= 8;
+  setBadge('g-kpi-ctr', fmtPct(ctr), badge(ctrGood, ctr >= 2.5 && !ctrGood));
+  const cvrGood = cvr >= 2 && cvr <= 4;
+  setBadge('g-kpi-cvr', fmtPct(cvr), badge(cvrGood, cvr >= 1 && !cvrGood));
+  if (!isNaN(beRoas)) {
+    const profitable = roas >= beRoas * 1.3;
+    const breakeven  = roas >= beRoas;
+    setBadge('g-kpi-roas', fmtX(roas) + ' vs BE ' + fmtX(beRoas), badge(profitable, breakeven && !profitable));
+  } else { setV('g-kpi-roas', '— (enter margin)'); }
+  if (!isNaN(qs)) setBadge('g-kpi-qs', qs+'/10', badge(qs>=6, qs>=4&&qs<6));
+  else setV('g-kpi-qs', '—');
+
+  // 3-Scenario Stress Test
+  const sc = (cpcMul, cvrMul) => {
+    const c = budget / (cpc * cpcMul);
+    const o = c * (cvr * cvrMul / 100);
+    const r = (o * aov) / budget;
+    return { cpc: cpc*cpcMul, cvr: cvr*cvrMul, orders: o, roas: r };
+  };
+  const cons = sc(1.2, 0.8), base_ = sc(1, 1), opti = sc(0.85, 1.2);
+  const setRow = (pfx, s) => {
+    document.getElementById(pfx+'-cpc-'+pfx[2]).textContent  = fmtRs(s.cpc);
+    document.getElementById(pfx+'-cvr-'+pfx[2]).textContent  = fmtPct(s.cvr);
+    document.getElementById(pfx+'-ord-'+pfx[2]).textContent  = fmtN(s.orders, 0);
+    document.getElementById(pfx+'-roas-'+pfx[2]).textContent = fmtX(s.roas);
+  };
+  // Manual assignment for clarity
+  document.getElementById('gs-cpc-c').textContent  = fmtRs(cons.cpc);
+  document.getElementById('gs-cvr-c').textContent  = fmtPct(cons.cvr);
+  document.getElementById('gs-ord-c').textContent  = fmtN(cons.orders, 0);
+  document.getElementById('gs-roas-c').textContent = fmtX(cons.roas);
+  document.getElementById('gs-cpc-b').textContent  = fmtRs(base_.cpc);
+  document.getElementById('gs-cvr-b').textContent  = fmtPct(base_.cvr);
+  document.getElementById('gs-ord-b').textContent  = fmtN(base_.orders, 0);
+  document.getElementById('gs-roas-b').textContent = fmtX(base_.roas);
+  document.getElementById('gs-cpc-o').textContent  = fmtRs(opti.cpc);
+  document.getElementById('gs-cvr-o').textContent  = fmtPct(opti.cvr);
+  document.getElementById('gs-ord-o').textContent  = fmtN(opti.orders, 0);
+  document.getElementById('gs-roas-o').textContent = fmtX(opti.roas);
+}
+
+function resetGoogle() {
+  ['g-budget','g-cpc','g-ctr','g-cvr','g-aov','g-margin','g-return','g-qs']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  calcGoogle();
+}
+
+function loadGoogleEx() {
+  setField('g-budget','100000'); setField('g-cpc','18');
+  setField('g-ctr','5.5');      setField('g-cvr','3.2');
+  setField('g-aov','1800');     setField('g-margin','45');
+  setField('g-return','8');     setField('g-qs','7');
+  calcGoogle();
+}
+
+// ══════════════════════════════════════════════
+//  META ADS E-COMMERCE
+// ══════════════════════════════════════════════
+function calcMeta() {
+  const budget = f('m-budget'), cpm = f('m-cpm'), ctr = f('m-ctr');
+  const cvr = f('m-cvr'), aov = f('m-aov'), margin = f('m-margin');
+  const freq = f('m-freq'), hook = f('m-hook'), returnRate = f('m-return');
+
+  const hint = document.getElementById('m-hint');
+  const hasCore = !isNaN(budget)&&!isNaN(cpm)&&!isNaN(ctr)&&!isNaN(cvr)&&!isNaN(aov)&&budget>0&&cpm>0&&ctr>0&&cvr>0&&aov>0;
+
+  if (!hasCore) {
+    hint.style.display = 'block';
+    ['m-impr','m-reach','m-clicks','m-cpc','m-orders','m-revenue','m-roas',
+     'm-cpa','m-be-roas','m-profit','m-net-rev','m-ecpm','m-hook-kpi',
+     'm-kpi-cpm','m-kpi-ctr','m-kpi-freq','m-kpi-roas','m-kpi-cvr',
+     'ms-cpm-c','ms-cvr-c','ms-ord-c','ms-roas-c',
+     'ms-cpm-b','ms-cvr-b','ms-ord-b','ms-roas-b',
+     'ms-cpm-o','ms-cvr-o','ms-ord-o','ms-roas-o'].forEach(id => setV(id, '—'));
+    return;
+  }
+  hint.style.display = 'none';
+
+  const impressions = (budget / cpm) * 1000;
+  const reach       = !isNaN(freq)&&freq>0 ? impressions / freq : NaN;
+  const clicks      = impressions * (ctr / 100);
+  const cpc_calc    = cpm / (ctr * 10);
+  const orders      = clicks * (cvr / 100);
+  const revenue     = orders * aov;
+  const roas        = revenue / budget;
+  const cpa         = budget / orders;
+  const beRoas      = !isNaN(margin)&&margin>0 ? 1 / (margin/100) : NaN;
+  const grossProfit = !isNaN(margin) ? (revenue * margin/100) - budget : NaN;
+  const netRev      = !isNaN(returnRate)&&returnRate>0 ? revenue * (1 - returnRate/100) : revenue;
+  const ecpm        = (budget / impressions) * 1000;
+
+  setV('m-impr',    fmtN(impressions, 0));
+  setV('m-reach',   isNaN(reach) ? '— (enter Frequency)' : fmtN(reach, 0));
+  setV('m-clicks',  fmtN(clicks, 0));
+  setV('m-cpc',     fmtRs(cpc_calc, 2));
+  setV('m-orders',  fmtN(orders, 0), 'hi');
+  setV('m-revenue', fmtRs(revenue), 'hi');
+  setV('m-roas',    fmtX(roas), roas >= (isNaN(beRoas)?2:beRoas) ? 'warn' : 'danger');
+  setV('m-cpa',     fmtRs(cpa));
+  setV('m-be-roas', isNaN(beRoas) ? '— (enter margin)' : fmtX(beRoas) + ' (min)', 'info');
+  setV('m-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtRs(grossProfit), grossProfit>=0?'hi':'danger');
+  setV('m-net-rev', fmtRs(netRev));
+  setV('m-ecpm',    fmtRs(ecpm, 2));
+
+  // Hook Rate
+  if (!isNaN(hook)) {
+    const hGood = hook >= 30, hWarn = hook >= 20;
+    setBadge('m-hook-kpi', fmtPct(hook, 1), badge(hGood, hWarn && !hGood));
+  } else { setV('m-hook-kpi', '— (enter Hook Rate)'); }
+
+  // KPI Health
+  setBadge('m-kpi-cpm',  fmtRs(cpm),        badge(cpm>=80&&cpm<=200, (cpm<80)||(cpm>200&&cpm<=280)));
+  setBadge('m-kpi-ctr',  fmtPct(ctr),        badge(ctr>=1.5&&ctr<=3,  ctr>=0.8&&ctr<1.5));
+  if (!isNaN(freq)) setBadge('m-kpi-freq', freq.toFixed(1)+'x', badge(freq>=1.5&&freq<=3.5, (freq<1.5)||(freq>3.5&&freq<=5)));
+  else setV('m-kpi-freq', '—');
+  if (!isNaN(beRoas)) {
+    const profitable = roas >= beRoas * 1.3;
+    const brk = roas >= beRoas;
+    setBadge('m-kpi-roas', fmtX(roas)+' vs BE '+fmtX(beRoas), badge(profitable, brk&&!profitable));
+  } else { setV('m-kpi-roas', '—'); }
+  setBadge('m-kpi-cvr', fmtPct(cvr), badge(cvr>=1.6&&cvr<=3, cvr>=0.8&&cvr<1.6));
+
+  // 3-Scenario
+  const mSc = (cpmMul, cvrMul) => {
+    const impr = (budget/(cpm*cpmMul))*1000;
+    const ord  = impr*(ctr/100)*(cvr*cvrMul/100);
+    const r    = (ord*aov)/budget;
+    return { cpm:cpm*cpmMul, cvr:cvr*cvrMul, orders:ord, roas:r };
+  };
+  const mc = mSc(1.2,0.8), mb = mSc(1,1), mo = mSc(0.85,1.2);
+  document.getElementById('ms-cpm-c').textContent  = fmtRs(mc.cpm);
+  document.getElementById('ms-cvr-c').textContent  = fmtPct(mc.cvr);
+  document.getElementById('ms-ord-c').textContent  = fmtN(mc.orders,0);
+  document.getElementById('ms-roas-c').textContent = fmtX(mc.roas);
+  document.getElementById('ms-cpm-b').textContent  = fmtRs(mb.cpm);
+  document.getElementById('ms-cvr-b').textContent  = fmtPct(mb.cvr);
+  document.getElementById('ms-ord-b').textContent  = fmtN(mb.orders,0);
+  document.getElementById('ms-roas-b').textContent = fmtX(mb.roas);
+  document.getElementById('ms-cpm-o').textContent  = fmtRs(mo.cpm);
+  document.getElementById('ms-cvr-o').textContent  = fmtPct(mo.cvr);
+  document.getElementById('ms-ord-o').textContent  = fmtN(mo.orders,0);
+  document.getElementById('ms-roas-o').textContent = fmtX(mo.roas);
+}
+
+function resetMeta() {
+  ['m-budget','m-cpm','m-ctr','m-cvr','m-aov','m-margin','m-freq','m-hook','m-return']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  calcMeta();
+}
+
+function loadMetaEx() {
+  setField('m-budget','80000');  setField('m-cpm','130');
+  setField('m-ctr','1.9');       setField('m-cvr','2.1');
+  setField('m-aov','1500');      setField('m-margin','48');
+  setField('m-freq','2.2');      setField('m-hook','28');
+  setField('m-return','10');
+  calcMeta();
+}
+
+// ══════════════════════════════════════════════
+//  UNIVERSAL
+// ══════════════════════════════════════════════
+function calcUniversal() {
+  // ── Break-even ROAS ──
+  const aov      = f('u-aov');
+  const margin   = f('u-margin');
+  const shipping = f('u-shipping');
+  const gateway  = f('u-gateway');
+  const retRate  = f('u-return');
+
+  if (!isNaN(aov) && !isNaN(margin) && aov>0 && margin>0) {
+    const grossProfit = aov * (margin/100);
+    const shipCost    = isNaN(shipping) ? 0 : shipping;
+    const gwCost      = isNaN(gateway)  ? 0 : aov * (gateway/100);
+    const retCost     = isNaN(retRate)  ? 0 : aov * (retRate/100) * 0.3; // 30% of returned items' value lost
+    const cm          = grossProfit - shipCost - gwCost - retCost;
+    const beRoas      = cm > 0 ? aov / cm : NaN;
+    const maxCpa      = cm > 0 ? cm * 0.8 : NaN; // 80% of contribution margin = max CPA
+    const targetRoas  = !isNaN(beRoas) ? beRoas * 1.3 : NaN;
+
+    setV('u-be-roas',     isNaN(beRoas)    ? '—' : fmtX(beRoas), 'warn');
+    setV('u-max-cpa',     isNaN(maxCpa)    ? '—' : fmtRs(maxCpa, 0));
+    setV('u-target-roas', isNaN(targetRoas) ? '—' : fmtX(targetRoas), 'hi');
+    setV('u-cm',          isNaN(cm)        ? '—' : fmtRs(cm, 0), cm>0?'hi':'danger');
+  } else {
+    ['u-be-roas','u-max-cpa','u-target-roas','u-cm'].forEach(id => setV(id,'—'));
+  }
+
+  // ── Blended ROAS / MER ──
+  const totalRev   = f('u-total-rev');
+  const gSpend     = f('u-g-spend');
+  const mSpend     = f('u-m-spend');
+  const otherSpend = f('u-other-spend');
+
+  if (!isNaN(totalRev) && totalRev > 0) {
+    const totalSpend  = (isNaN(gSpend)?0:gSpend) + (isNaN(mSpend)?0:mSpend) + (isNaN(otherSpend)?0:otherSpend);
+    const blendedRoas = totalSpend > 0 ? totalRev / totalSpend : NaN;
+    const merPct      = totalSpend > 0 ? (totalSpend / totalRev) * 100 : NaN;
+
+    setV('u-total-spend',  totalSpend > 0 ? fmtRs(totalSpend) : '—');
+    setV('u-blended-roas', isNaN(blendedRoas) ? '—' : fmtX(blendedRoas), 'warn');
+    setV('u-mer-pct',      isNaN(merPct) ? '—' : fmtPct(merPct, 1));
+    if (!isNaN(blendedRoas)) {
+      const good = blendedRoas >= 3.5, warn_ = blendedRoas >= 2.5;
+      setBadge('u-blended-health', fmtX(blendedRoas), badge(good, warn_&&!good));
+    } else { setV('u-blended-health','—'); }
+  } else {
+    ['u-total-spend','u-blended-roas','u-mer-pct','u-blended-health'].forEach(id => setV(id,'—'));
+  }
+
+  // ── AOV Optimiser ──
+  const curAov    = f('u-cur-aov');
+  const newAov    = f('u-new-aov');
+  const aovSpend  = f('u-aov-spend');
+  const aovOrders = f('u-aov-orders');
+
+  if (!isNaN(curAov)&&!isNaN(aovOrders)&&aovOrders>0) {
+    const curRev  = curAov * aovOrders;
+    const newRev  = !isNaN(newAov) ? newAov * aovOrders : NaN;
+    const curRoas = !isNaN(aovSpend)&&aovSpend>0 ? curRev / aovSpend : NaN;
+    const newRoas = !isNaN(newAov)&&!isNaN(aovSpend)&&aovSpend>0 ? newRev / aovSpend : NaN;
+    const extraRev = !isNaN(newRev) ? newRev - curRev : NaN;
+
+    setV('u-cur-rev',   fmtRs(curRev));
+    setV('u-new-rev',   isNaN(newRev)   ? '— (enter Target AOV)' : fmtRs(newRev), 'hi');
+    setV('u-cur-roas',  isNaN(curRoas)  ? '— (enter Ad Spend)'   : fmtX(curRoas), 'warn');
+    setV('u-new-roas',  isNaN(newRoas)  ? '— (enter Target AOV)' : fmtX(newRoas), 'hi');
+    setV('u-extra-rev', isNaN(extraRev) ? '—'                    : fmtRs(extraRev), 'hi');
+  } else {
+    ['u-cur-rev','u-new-rev','u-cur-roas','u-new-roas','u-extra-rev'].forEach(id => setV(id,'—'));
+  }
+}
+
+function resetUniversal() {
+  ['u-aov','u-margin','u-shipping','u-gateway','u-return',
+   'u-total-rev','u-g-spend','u-m-spend','u-other-spend',
+   'u-cur-aov','u-new-aov','u-aov-spend','u-aov-orders']
+   .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  calcUniversal();
+}
+
+function loadUniEx() {
+  // Break-even
+  setField('u-aov','1800');     setField('u-margin','45');
+  setField('u-shipping','80');  setField('u-gateway','2');
+  setField('u-return','8');
+  // Blended ROAS
+  setField('u-total-rev','5000000'); setField('u-g-spend','100000');
+  setField('u-m-spend','80000');     setField('u-other-spend','20000');
+  // AOV Optimiser
+  setField('u-cur-aov','1500');  setField('u-new-aov','1900');
+  setField('u-aov-spend','100000'); setField('u-aov-orders','280');
+  calcUniversal();
+}
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a00b82b75f3bc1ae',t:'MTc3OTYxNzQyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
