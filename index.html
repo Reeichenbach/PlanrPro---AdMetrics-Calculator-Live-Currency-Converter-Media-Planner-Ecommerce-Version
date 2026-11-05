@@ -120,6 +120,33 @@
     .inp:focus { border-color:rgba(245,158,11,0.6); background:rgba(245,158,11,0.08); }
     .inp::placeholder { color:rgba(255,255,255,0.2); font-weight:400; }
 
+    /* ── CURRENCY BAR / FX ── */
+    .cur-bar {
+      width:100%; display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px; padding:8px 12px;
+    }
+    .cur-lbl {
+      font-size:10px; font-weight:700; letter-spacing:1px;
+      text-transform:uppercase; color:rgba(255,255,255,0.35);
+    }
+    .cur-bar select {
+      margin-left:auto; background:rgba(255,255,255,0.08); color:#fff;
+      border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:6px 8px;
+      font-size:12px; font-weight:700; cursor:pointer; outline:none; max-width:170px;
+    }
+    .cur-bar select option { background:#1e1b4b; color:#fff; }
+    .fx-status { width:100%; text-align:center; font-size:10px; color:rgba(255,255,255,0.3); }
+    .fx-status.live    { color:#34d399; }
+    .fx-status.loading { color:rgba(255,255,255,0.45); }
+    .fx-status.offline { color:#f59e0b; }
+    .fx-sel { width:130px; text-align:left; }
+    .fx-result {
+      font-size:24px; font-weight:800; color:#10b981;
+      text-align:center; padding:10px 0 2px;
+    }
+    .fx-rate-line { font-size:10px; color:rgba(255,255,255,0.35); text-align:center; }
+
     /* ── OUTPUT ROW ── */
     .out-row {
       display:flex; align-items:center; justify-content:space-between;
@@ -324,6 +351,13 @@
     </div>
   </div>
 
+  <!-- DISPLAY CURRENCY -->
+  <div class="cur-bar">
+    <span class="cur-lbl">💱 Display currency</span>
+    <select id="cur-select" aria-label="Display currency" onchange="setCurrency(this.value)"></select>
+  </div>
+  <div class="fx-status" id="fx-status">Rates: loading…</div>
+
   <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('google')">🔵 Google</button>
@@ -352,17 +386,17 @@
       <div class="row"><div class="lbl">Monthly Budget (₹)<small>Total Google Ads spend</small></div>
         <input class="inp" id="g-budget" type="number" placeholder="e.g. 100000" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">Avg. CPC (₹)<small>₹8–₹45 typical India e-com</small></div>
-        <input class="inp" id="g-cpc" type="number" placeholder="e.g. 18" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-cpc" type="number" step="any" placeholder="e.g. 18" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">CTR (%)<small>Search: 4–8% · Shopping: 0.8–2%</small></div>
-        <input class="inp" id="g-ctr" type="number" placeholder="e.g. 5.5" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-ctr" type="number" step="any" placeholder="e.g. 5.5" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">CVR — Purchase Rate (%)<small>Industry avg: 2–4% e-com</small></div>
-        <input class="inp" id="g-cvr" type="number" placeholder="e.g. 3.2" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-cvr" type="number" step="any" placeholder="e.g. 3.2" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)<small>Average cart value per purchase</small></div>
-        <input class="inp" id="g-aov" type="number" placeholder="e.g. 1800" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-aov" type="number" step="any" placeholder="e.g. 1800" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue minus COGS · e.g. 45%</small></div>
-        <input class="inp" id="g-margin" type="number" placeholder="e.g. 45" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-margin" type="number" step="any" placeholder="e.g. 45" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">Return Rate (%)<small>% of orders returned · optional</small></div>
-        <input class="inp" id="g-return" type="number" placeholder="e.g. 8" oninput="calcGoogle()"/></div>
+        <input class="inp" id="g-return" type="number" step="any" placeholder="e.g. 8" oninput="calcGoogle()"/></div>
       <div class="row"><div class="lbl">Quality Score (1–10)<small>optional</small></div>
         <input class="inp" id="g-qs" type="number" placeholder="e.g. 7" min="1" max="10" oninput="calcGoogle()"/></div>
       <button class="reset-btn" onclick="resetGoogle()">↺ Reset</button>
@@ -425,21 +459,21 @@
       <div class="row"><div class="lbl">Monthly Budget (₹)<small>Total Meta spend</small></div>
         <input class="inp" id="m-budget" type="number" placeholder="e.g. 80000" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">CPM (₹)<small>India e-com: ₹80–₹200 · Global ~$14–17</small></div>
-        <input class="inp" id="m-cpm" type="number" placeholder="e.g. 130" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-cpm" type="number" step="any" placeholder="e.g. 130" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">CTR — Link Click (%)<small>E-com avg: 1.5–2.5%</small></div>
-        <input class="inp" id="m-ctr" type="number" placeholder="e.g. 1.9" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-ctr" type="number" step="any" placeholder="e.g. 1.9" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Purchase CVR (%)<small>% of clicks that purchase · avg 1.6–2.7%</small></div>
-        <input class="inp" id="m-cvr" type="number" placeholder="e.g. 2.1" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-cvr" type="number" step="any" placeholder="e.g. 2.1" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)<small>Average cart value</small></div>
-        <input class="inp" id="m-aov" type="number" placeholder="e.g. 1500" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-aov" type="number" step="any" placeholder="e.g. 1500" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue minus COGS</small></div>
-        <input class="inp" id="m-margin" type="number" placeholder="e.g. 48" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-margin" type="number" step="any" placeholder="e.g. 48" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Frequency<small>1.5–3.5× healthy · optional</small></div>
-        <input class="inp" id="m-freq" type="number" placeholder="e.g. 2.2" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-freq" type="number" step="any" placeholder="e.g. 2.2" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Hook Rate (%)<small>% who watch 3s of video · 25–35%+ good · optional</small></div>
-        <input class="inp" id="m-hook" type="number" placeholder="e.g. 28" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-hook" type="number" step="any" placeholder="e.g. 28" oninput="calcMeta()"/></div>
       <div class="row"><div class="lbl">Return Rate (%)<small>optional</small></div>
-        <input class="inp" id="m-return" type="number" placeholder="e.g. 10" oninput="calcMeta()"/></div>
+        <input class="inp" id="m-return" type="number" step="any" placeholder="e.g. 10" oninput="calcMeta()"/></div>
       <button class="reset-btn" onclick="resetMeta()">↺ Reset</button>
     </div>
 
@@ -494,15 +528,15 @@
         <button class="ex-btn" onclick="loadUniEx()">⚡ Load Example</button>
       </div>
       <div class="row"><div class="lbl">Avg. Order Value — AOV (₹)</div>
-        <input class="inp" id="u-aov" type="number" placeholder="e.g. 1800" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-aov" type="number" step="any" placeholder="e.g. 1800" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Gross Margin (%)<small>Revenue − COGS</small></div>
-        <input class="inp" id="u-margin" type="number" placeholder="e.g. 45" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-margin" type="number" step="any" placeholder="e.g. 45" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Shipping + Fulfilment Cost (₹)<small>Per order · optional</small></div>
-        <input class="inp" id="u-shipping" type="number" placeholder="e.g. 80" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-shipping" type="number" step="any" placeholder="e.g. 80" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Payment Gateway Fee (%)<small>Typically 1.5–2.5% · optional</small></div>
-        <input class="inp" id="u-gateway" type="number" placeholder="e.g. 2" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-gateway" type="number" step="any" placeholder="e.g. 2" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Return Rate (%)<small>optional</small></div>
-        <input class="inp" id="u-return" type="number" placeholder="e.g. 8" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-return" type="number" step="any" placeholder="e.g. 8" oninput="calcUniversal()"/></div>
       <div class="out-row" style="margin-top:10px;"><div class="out-lbl">Break-even ROAS<span class="ftag">1 ÷ (Gross Margin% − Shipping% − Gateway%)</span></div><div class="out-val warn" id="u-be-roas">—</div></div>
       <div class="out-row"><div class="out-lbl">Max Allowable CPA (₹)<span class="ftag">AOV × Gross Margin% − Costs</span></div><div class="out-val" id="u-max-cpa">—</div></div>
       <div class="out-row"><div class="out-lbl">Target Profitable ROAS<span class="ftag">Break-even ROAS × 1.3 (30% buffer)</span></div><div class="out-val hi" id="u-target-roas">—</div></div>
@@ -530,9 +564,9 @@
     <div class="grp">
       <div class="grp-title"><span class="dot d-yellow"></span> AOV Optimiser — Impact of +₹ on ROAS</div>
       <div class="row"><div class="lbl">Current AOV (₹)</div>
-        <input class="inp" id="u-cur-aov" type="number" placeholder="e.g. 1500" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-cur-aov" type="number" step="any" placeholder="e.g. 1500" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Target AOV (₹)<small>e.g. with upsell/bundle</small></div>
-        <input class="inp" id="u-new-aov" type="number" placeholder="e.g. 1900" oninput="calcUniversal()"/></div>
+        <input class="inp" id="u-new-aov" type="number" step="any" placeholder="e.g. 1900" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Monthly Ad Spend (₹)</div>
         <input class="inp" id="u-aov-spend" type="number" placeholder="e.g. 100000" oninput="calcUniversal()"/></div>
       <div class="row"><div class="lbl">Monthly Orders</div>
@@ -542,6 +576,22 @@
       <div class="out-row"><div class="out-lbl">Current ROAS</div><div class="out-val" id="u-cur-roas">—</div></div>
       <div class="out-row"><div class="out-lbl">New ROAS at Target AOV</div><div class="out-val hi" id="u-new-roas">—</div></div>
       <div class="out-row"><div class="out-lbl">Extra Revenue per Month (₹)</div><div class="out-val hi" id="u-extra-rev">—</div></div>
+    </div>
+
+    <!-- Currency Converter -->
+    <div class="grp">
+      <div class="grp-title"><span class="dot d-purple"></span> 💱 Live Currency Converter
+        <button class="ex-btn" onclick="refreshRates()">↻ Refresh Rates</button>
+      </div>
+      <div class="row"><div class="lbl">Amount<small>Any amount, any currency</small></div>
+        <input class="inp" id="fx-amount" type="number" step="any" placeholder="e.g. 100000" oninput="calcFx()"/></div>
+      <div class="row"><div class="lbl">From</div>
+        <select class="inp fx-sel" id="fx-from" aria-label="Convert from currency" onchange="calcFx()"></select></div>
+      <div class="row"><div class="lbl">To</div>
+        <select class="inp fx-sel" id="fx-to" aria-label="Convert to currency" onchange="calcFx()"></select></div>
+      <button class="reset-btn" onclick="swapFx()" style="margin-top:10px;">⇄ Swap Currencies</button>
+      <div class="fx-result" id="fx-result">—</div>
+      <div class="fx-rate-line" id="fx-rate-line">Enter an amount to convert</div>
     </div>
 
     <button class="reset-btn" onclick="resetUniversal()" style="margin-top:4px;">↺ Reset Universal</button>
@@ -838,10 +888,14 @@
 // ══════════════════════════════════════════════
 function switchTab(tab) {
   document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-pressed', 'false');
+  });
   document.getElementById('tab-' + tab).classList.add('active');
   const idx = {google:0, meta:1, universal:2, learn:3}[tab];
-  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  const btn = document.querySelectorAll('.tab-btn')[idx];
+  if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
 }
 
 function switchLearn(sub) {
@@ -856,7 +910,14 @@ function switchLearn(sub) {
 // ══════════════════════════════════════════════
 function f(id) { return parseFloat(document.getElementById(id).value); }
 function fmtN(n, d=0) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d}); }
-function fmtRs(n, d=0) { if (!isFinite(n)||isNaN(n)) return '—'; return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+function fmtIn(code, n, d) {
+  if (!isFinite(n)||isNaN(n)) return '—';
+  const meta = curMeta(code);
+  const body = Math.abs(n).toLocaleString(meta.locale,{maximumFractionDigits:d,minimumFractionDigits:d});
+  return (n < 0 ? '-' : '') + meta.symbol + body;
+}
+// Used by every planner output — follows the display currency.
+function fmtMoney(n, d=0) { return fmtIn(DISPLAY_CUR, n, d); }
 function fmtPct(n, d=2) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toFixed(d)+'%'; }
 function fmtX(n, d=2) { if (!isFinite(n)||isNaN(n)) return '—'; return n.toFixed(d)+'x'; }
 
@@ -876,16 +937,355 @@ function badge(isGood, isWarn) {
 }
 function setField(id, val) { const el=document.getElementById(id); if(el) el.value=val; }
 
+// Clamp a parsed number into [lo, hi]; NaN passes through as NaN.
+function clampOr(v, lo, hi) { return isNaN(v) ? NaN : Math.min(hi, Math.max(lo, v)); }
+
+// Unit economics shared by the Google and Meta planners.
+// Margin / return rate are clamped to sane ranges so a typo can't produce a fantasy forecast.
+function economics(revenue, budget, margin, returnRate) {
+  const m   = clampOr(margin, 0, 100);
+  const ret = clampOr(returnRate, 0, 100);
+  const beRoas      = !isNaN(m) && m > 0 ? 100 / m : NaN;          // 1 ÷ (margin%)
+  const targetRoas  = isNaN(beRoas) ? NaN : beRoas * 1.3;          // +30% buffer
+  const grossProfit = !isNaN(m) ? revenue * (m / 100) - budget : NaN;
+  const netRev      = (!isNaN(ret) && ret > 0) ? revenue * (1 - ret / 100) : revenue;
+  return { beRoas, targetRoas, grossProfit, netRev };
+}
+
+// ROAS is only "good" once it clears break-even ROAS + 30% — same rule the KPI badge uses.
+function roasClass(roas, beRoas) {
+  const floor = isNaN(beRoas) ? 2 : beRoas;   // no margin entered: fall back to a 2x sanity floor
+  if (roas >= floor * 1.3) return 'hi';
+  if (roas >= floor) return 'warn';
+  return 'danger';
+}
+
+// Fill a 3-scenario stress-test table (cons / base / opti rows).
+function renderScenarios(table, metric, rows) {
+  const put = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  rows.forEach(([key, s]) => {
+    put(table + '-' + metric + '-' + key, fmtMoney(s[metric]));
+    put(table + '-cvr-' + key,  fmtPct(s.cvr));
+    put(table + '-ord-' + key,  fmtN(s.orders, 0));
+    put(table + '-roas-' + key, fmtX(s.roas));
+  });
+}
+
+// ── INPUT PERSISTENCE ──
+// Keeps the last plan in the browser so a reload doesn't wipe 30 fields.
+const STORE_KEY = 'planrpro.admetrics.ecom.inputs.v1';
+function allInputs() { return Array.from(document.querySelectorAll('.inp')); }
+// The display currency is stored inside the same blob as the inputs, so a restored
+// plan is never reinterpreted in a different currency than it was saved in.
+function saveState() {
+  try {
+    const data = { __cur: DISPLAY_CUR };
+    allInputs().forEach(el => { if (el.id) data[el.id] = el.value; });
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  } catch (e) { /* private mode or quota — silently skip */ }
+}
+function readSavedState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? (JSON.parse(raw) || {}) : null;
+  } catch (e) { return null; }
+}
+function restoreState() {
+  const data = readSavedState();
+  if (!data) return false;
+  Object.keys(data).forEach(id => { if (id.charAt(0) !== '_') setField(id, data[id]); });
+  return true;
+}
+function clearState() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+
+// ══════════════════════════════════════════════
+//  CURRENCY — display currency + live FX rates
+// ══════════════════════════════════════════════
+const CURRENCIES = {
+  INR: { symbol: '₹',    locale: 'en-IN', name: 'Indian Rupee' },
+  USD: { symbol: '$',    locale: 'en-US', name: 'US Dollar' },
+  EUR: { symbol: '€',    locale: 'en-IE', name: 'Euro' },
+  GBP: { symbol: '£',    locale: 'en-GB', name: 'British Pound' },
+  AED: { symbol: 'AED ', locale: 'en-AE', name: 'UAE Dirham' },
+  SGD: { symbol: 'S$',   locale: 'en-SG', name: 'Singapore Dollar' },
+  AUD: { symbol: 'A$',   locale: 'en-AU', name: 'Australian Dollar' },
+  CAD: { symbol: 'C$',   locale: 'en-CA', name: 'Canadian Dollar' },
+};
+
+// Bundled estimate as INR per 1 unit: used before the first fetch, when offline,
+// or if the FX endpoint is unreachable/blocked. The UI always says which is in play.
+const FALLBACK_RATES_INR = { INR:1, USD:83.40, EUR:90.10, GBP:105.60, AED:22.70, SGD:61.90, AUD:54.30, CAD:59.60 };
+
+let DISPLAY_CUR = 'INR';
+let RATES      = Object.assign({}, FALLBACK_RATES_INR);
+let RATES_META = { live: false, at: null };
+
+const CUR_STORE_KEY  = 'planrpro.admetrics.ecom.currency.v1';
+const RATE_CACHE_KEY = 'planrpro.admetrics.ecom.rates.v1';
+const RATE_TTL_MS    = 6 * 60 * 60 * 1000;   // refetch live rates at most every 6h
+
+// Money inputs that get re-expressed when the display currency changes.
+// Percentages, counts and Quality Score must NOT be converted.
+const MONEY_IDS = ['g-budget','g-cpc','g-aov',
+                   'm-budget','m-cpm','m-aov',
+                   'u-aov','u-shipping','u-total-rev','u-g-spend','u-m-spend','u-other-spend',
+                   'u-cur-aov','u-new-aov','u-aov-spend'];
+
+function curMeta(code) { return CURRENCIES[code] || CURRENCIES.INR; }
+
+// Wrap the literal ₹ in the planner labels so the symbol can be swapped in place.
+// Deliberately NOT applied to the Learn tab: those ₹999 / ₹5L / ₹100 figures are
+// India-specific teaching examples and must stay rupees whatever the display currency.
+function markCurrencyNodes(root) {
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const targets = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.nodeValue.indexOf('₹') !== -1) targets.push(node);
+  }
+  targets.forEach(textNode => {
+    const parts = textNode.nodeValue.split('₹');
+    const frag  = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i > 0) {
+        const span = document.createElement('span');
+        span.className = 'cur-mark';
+        span.textContent = '₹';
+        frag.appendChild(span);
+      }
+      if (part) frag.appendChild(document.createTextNode(part));
+    });
+    if (textNode.parentNode) textNode.parentNode.replaceChild(frag, textNode);
+  });
+}
+
+function applyCurrencySymbols() {
+  const symbol = curMeta(DISPLAY_CUR).symbol;
+  document.querySelectorAll('.cur-mark').forEach(el => { el.textContent = symbol; });
+  const sel = document.getElementById('cur-select');
+  if (sel && sel.value !== DISPLAY_CUR) sel.value = DISPLAY_CUR;
+}
+
+function currencyOptions(selected) {
+  return Object.keys(CURRENCIES).map(code => {
+    const meta = CURRENCIES[code];
+    return '<option value="' + code + '"' + (code === selected ? ' selected' : '') + '>' +
+           meta.symbol.trim() + ' ' + code + ' · ' + meta.name + '</option>';
+  }).join('');
+}
+
+function populateCurrencySelects() {
+  const header = document.getElementById('cur-select');
+  if (header) header.innerHTML = currencyOptions(DISPLAY_CUR);
+  const from = document.getElementById('fx-from');
+  const to   = document.getElementById('fx-to');
+  if (from) from.innerHTML = currencyOptions(from.value || DISPLAY_CUR);
+  if (to)   to.innerHTML   = currencyOptions(to.value   || (DISPLAY_CUR === 'USD' ? 'INR' : 'USD'));
+}
+
+// Switching currency re-expresses the money you already typed, so the plan keeps
+// its real value instead of silently becoming 83x cheaper.
+function setCurrency(code) {
+  if (!CURRENCIES[code] || code === DISPLAY_CUR) return;
+  const factor = (RATES[DISPLAY_CUR] || 1) / (RATES[code] || 1);
+  DISPLAY_CUR = code;
+  MONEY_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = parseFloat(el.value);
+    if (!isFinite(v) || v === 0) return;
+    el.value = String(Number((v * factor).toPrecision(8)));   // 8 sig-figs so switching back restores the exact number
+  });
+  applyCurrencySymbols();
+  enhanceA11y();
+  saveCurrency();
+  renderAll();
+}
+
+function saveCurrency() {
+  try { localStorage.setItem(CUR_STORE_KEY, DISPLAY_CUR); } catch (e) {}
+}
+function restoreCurrency() {
+  try {
+    const code = localStorage.getItem(CUR_STORE_KEY);
+    if (code && CURRENCIES[code]) DISPLAY_CUR = code;
+  } catch (e) {}
+}
+
+// ── FX rates ──
+function invertPerBase(perBase) {
+  const out = {};
+  Object.keys(CURRENCIES).forEach(code => {
+    if (code === 'INR') { out.INR = 1; return; }
+    const v = perBase[code];
+    out[code] = (typeof v === 'number' && v > 0) ? (1 / v) : FALLBACK_RATES_INR[code];
+  });
+  return out;
+}
+
+function readRateCache() {
+  try {
+    const raw = localStorage.getItem(RATE_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || !cached.rates || !cached.at) return null;
+    if (Date.now() - cached.at > RATE_TTL_MS) return null;
+    return cached;
+  } catch (e) { return null; }
+}
+function writeRateCache() {
+  try {
+    localStorage.setItem(RATE_CACHE_KEY, JSON.stringify({ rates: RATES, at: RATES_META.at || Date.now(), live: !!RATES_META.live }));
+  } catch (e) {}
+}
+
+function setRateStatus(state, text) {
+  const el = document.getElementById('fx-status');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'fx-status' + (state ? ' ' + state : '');
+}
+
+function renderRateStatus() {
+  const usd = '1 USD = ₹' + RATES.USD.toFixed(2);
+  if (RATES_META.live && RATES_META.at) {
+    const t = new Date(RATES_META.at);
+    const hh = String(t.getHours()).padStart(2, '0');
+    const mm = String(t.getMinutes()).padStart(2, '0');
+    setRateStatus('live', '🟢 Live rates · ' + usd + ' · updated ' + hh + ':' + mm);
+  } else {
+    setRateStatus('offline', '🟡 Offline · bundled estimate · ' + usd + ' · ↻ to retry');
+  }
+}
+
+function getJson(url, ms) {
+  const controller = (typeof AbortController === 'function') ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), ms || 7000) : null;
+  return fetch(url, controller ? { signal: controller.signal } : undefined)
+    .then(res => {
+      if (!res || !res.ok) throw new Error('HTTP ' + (res && res.status));
+      return res.json();
+    })
+    .then(json => { if (timer) clearTimeout(timer); return json; })
+    .catch(err => { if (timer) clearTimeout(timer); throw err; });
+}
+
+// Order matters: first reachable source wins, otherwise the bundled table stays.
+const RATE_SOURCES = [
+  { url: 'https://open.er-api.com/v6/latest/INR',
+    parse: d => (d && d.rates) ? d.rates : null },
+  { url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/inr.json',
+    parse: d => (d && d.inr) ? d.inr : null },
+];
+
+function fetchRates() {
+  if (typeof fetch !== 'function') { renderRateStatus(); return Promise.resolve(false); }
+  setRateStatus('loading', '⏳ Fetching live rates…');
+  const attempt = i => {
+    if (i >= RATE_SOURCES.length) {
+      RATES_META = { live: false, at: null };
+      renderRateStatus();
+      renderAll();
+      return false;
+    }
+    const source = RATE_SOURCES[i];
+    return getJson(source.url)
+      .then(data => {
+        const perBase = source.parse(data);
+        if (!perBase) throw new Error('unexpected payload');
+        const rates = invertPerBase(perBase);
+        if (!rates.USD || !rates.EUR) throw new Error('incomplete rates');
+        RATES      = rates;
+        RATES_META = { live: true, at: Date.now() };
+        writeRateCache();
+        renderRateStatus();
+        renderAll();
+        return true;
+      })
+      .catch(() => attempt(i + 1));
+  };
+  return Promise.resolve().then(() => attempt(0));
+}
+
+function refreshRates() { return fetchRates(); }
+
+function initRates() {
+  const cached = readRateCache();
+  if (cached) {
+    RATES      = Object.assign({}, FALLBACK_RATES_INR, cached.rates);
+    RATES_META = { live: !!cached.live, at: cached.at };
+    renderRateStatus();
+    renderAll();
+    return;
+  }
+  fetchRates();   // fire-and-forget; the UI already works on bundled rates
+}
+
+// ── Converter card ──
+function calcFx() {
+  saveState();
+  const amountEl = document.getElementById('fx-amount');
+  const fromEl   = document.getElementById('fx-from');
+  const toEl     = document.getElementById('fx-to');
+  const out      = document.getElementById('fx-result');
+  const line     = document.getElementById('fx-rate-line');
+  if (!amountEl || !fromEl || !toEl || !out || !line) return;
+
+  const amount = parseFloat(amountEl.value);
+  const from   = fromEl.value;
+  const to     = toEl.value;
+
+  if (isNaN(amount) || !RATES[from] || !RATES[to]) {
+    out.textContent  = '—';
+    line.textContent = 'Enter an amount to convert';
+    return;
+  }
+  const rate = RATES[from] / RATES[to];
+  out.textContent  = fmtIn(to, amount * rate, 2);
+  line.textContent = '1 ' + from + ' = ' + fmtIn(to, rate, 4) + ' · ' + (RATES_META.live ? 'live rate' : 'bundled estimate');
+}
+
+function swapFx() {
+  const from = document.getElementById('fx-from');
+  const to   = document.getElementById('fx-to');
+  if (!from || !to) return;
+  const held = from.value;
+  from.value = to.value;
+  to.value   = held;
+  calcFx();
+}
+
+function renderAll() { calcGoogle(); calcMeta(); calcUniversal(); calcFx(); }
+
+// Give every input an accessible name derived from its visible label.
+function enhanceA11y() {
+  allInputs().forEach(inp => {
+    const row = inp.closest('.row');
+    const lbl = row ? row.querySelector('.lbl') : null;
+    if (lbl) {
+      const text = (lbl.textContent || '').replace(/\s+/g, ' ').trim().replace(/\s*[-·]\s*$/, '');
+      if (text) inp.setAttribute('aria-label', text);
+    }
+    if (inp.type === 'number') inp.setAttribute('inputmode', 'decimal');
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false');
+  });
+}
+
 // ══════════════════════════════════════════════
 //  GOOGLE ADS E-COMMERCE
 // ══════════════════════════════════════════════
 function calcGoogle() {
+  saveState();
   const budget = f('g-budget'), cpc = f('g-cpc'), ctr = f('g-ctr');
   const cvr = f('g-cvr'), aov = f('g-aov'), margin = f('g-margin');
-  const returnRate = f('g-return'), qs = f('g-qs');
+  const returnRate = f('g-return');
+  const qs = clampOr(f('g-qs'), 1, 10);
 
   const hint = document.getElementById('g-hint');
-  const hasCore = !isNaN(budget)&&!isNaN(cpc)&&!isNaN(ctr)&&!isNaN(cvr)&&!isNaN(aov)&&budget>0&&cpc>0&&ctr>0&&cvr>0&&aov>0;
+  const hasCore = [budget, cpc, ctr, cvr, aov].every(v => !isNaN(v) && v > 0);
 
   if (!hasCore) {
     hint.style.display = 'block';
@@ -905,21 +1305,18 @@ function calcGoogle() {
   const revenue     = orders * aov;
   const roas        = revenue / budget;
   const cpa         = budget / orders;
-  const beRoas      = !isNaN(margin)&&margin>0 ? 1 / (margin/100) : NaN;
-  const targetRoas  = !isNaN(beRoas) ? beRoas * 1.3 : NaN;
-  const grossProfit = !isNaN(margin) ? (revenue * margin/100) - budget : NaN;
-  const netRev      = !isNaN(returnRate)&&returnRate>0 ? revenue * (1 - returnRate/100) : revenue;
+  const { beRoas, grossProfit, netRev } = economics(revenue, budget, margin, returnRate);
   const mer         = (budget / revenue) * 100;
 
   setV('g-clicks',  fmtN(clicks, 0));
   setV('g-impr',    fmtN(impressions, 0));
   setV('g-orders',  fmtN(orders, 0), 'hi');
-  setV('g-revenue', fmtRs(revenue), 'hi');
-  setV('g-roas',    fmtX(roas), roas >= (isNaN(beRoas)?2.2:beRoas) ? 'warn' : 'danger');
-  setV('g-cpa',     fmtRs(cpa));
-  setV('g-be-roas', isNaN(beRoas) ? '— (enter margin)' : fmtX(beRoas) + ' (min)', 'info');
-  setV('g-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtRs(grossProfit), grossProfit >= 0 ? 'hi' : 'danger');
-  setV('g-net-rev', fmtRs(netRev));
+  setV('g-revenue', fmtMoney(revenue), 'hi');
+  setV('g-roas',    fmtX(roas), roasClass(roas, beRoas));
+  setV('g-cpa',     fmtMoney(cpa));
+  setV('g-be-roas', isNaN(beRoas) ? '— (enter margin > 0)' : fmtX(beRoas) + ' (min)', 'info');
+  setV('g-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtMoney(grossProfit), grossProfit >= 0 ? 'hi' : 'danger');
+  setV('g-net-rev', fmtMoney(netRev));
   setV('g-mer',     fmtPct(mer, 1));
 
   // KPI Health
@@ -932,7 +1329,7 @@ function calcGoogle() {
     const breakeven  = roas >= beRoas;
     setBadge('g-kpi-roas', fmtX(roas) + ' vs BE ' + fmtX(beRoas), badge(profitable, breakeven && !profitable));
   } else { setV('g-kpi-roas', '— (enter margin)'); }
-  if (!isNaN(qs)) setBadge('g-kpi-qs', qs+'/10', badge(qs>=6, qs>=4&&qs<6));
+  if (!isNaN(qs)) setBadge('g-kpi-qs', qs + '/10', badge(qs >= 6, qs >= 4 && qs < 6));
   else setV('g-kpi-qs', '—');
 
   // 3-Scenario Stress Test
@@ -940,28 +1337,9 @@ function calcGoogle() {
     const c = budget / (cpc * cpcMul);
     const o = c * (cvr * cvrMul / 100);
     const r = (o * aov) / budget;
-    return { cpc: cpc*cpcMul, cvr: cvr*cvrMul, orders: o, roas: r };
+    return { cpc: cpc * cpcMul, cvr: cvr * cvrMul, orders: o, roas: r };
   };
-  const cons = sc(1.2, 0.8), base_ = sc(1, 1), opti = sc(0.85, 1.2);
-  const setRow = (pfx, s) => {
-    document.getElementById(pfx+'-cpc-'+pfx[2]).textContent  = fmtRs(s.cpc);
-    document.getElementById(pfx+'-cvr-'+pfx[2]).textContent  = fmtPct(s.cvr);
-    document.getElementById(pfx+'-ord-'+pfx[2]).textContent  = fmtN(s.orders, 0);
-    document.getElementById(pfx+'-roas-'+pfx[2]).textContent = fmtX(s.roas);
-  };
-  // Manual assignment for clarity
-  document.getElementById('gs-cpc-c').textContent  = fmtRs(cons.cpc);
-  document.getElementById('gs-cvr-c').textContent  = fmtPct(cons.cvr);
-  document.getElementById('gs-ord-c').textContent  = fmtN(cons.orders, 0);
-  document.getElementById('gs-roas-c').textContent = fmtX(cons.roas);
-  document.getElementById('gs-cpc-b').textContent  = fmtRs(base_.cpc);
-  document.getElementById('gs-cvr-b').textContent  = fmtPct(base_.cvr);
-  document.getElementById('gs-ord-b').textContent  = fmtN(base_.orders, 0);
-  document.getElementById('gs-roas-b').textContent = fmtX(base_.roas);
-  document.getElementById('gs-cpc-o').textContent  = fmtRs(opti.cpc);
-  document.getElementById('gs-cvr-o').textContent  = fmtPct(opti.cvr);
-  document.getElementById('gs-ord-o').textContent  = fmtN(opti.orders, 0);
-  document.getElementById('gs-roas-o').textContent = fmtX(opti.roas);
+  renderScenarios('gs', 'cpc', [['c', sc(1.2, 0.8)], ['b', sc(1, 1)], ['o', sc(0.85, 1.2)]]);
 }
 
 function resetGoogle() {
@@ -982,12 +1360,13 @@ function loadGoogleEx() {
 //  META ADS E-COMMERCE
 // ══════════════════════════════════════════════
 function calcMeta() {
+  saveState();
   const budget = f('m-budget'), cpm = f('m-cpm'), ctr = f('m-ctr');
   const cvr = f('m-cvr'), aov = f('m-aov'), margin = f('m-margin');
   const freq = f('m-freq'), hook = f('m-hook'), returnRate = f('m-return');
 
   const hint = document.getElementById('m-hint');
-  const hasCore = !isNaN(budget)&&!isNaN(cpm)&&!isNaN(ctr)&&!isNaN(cvr)&&!isNaN(aov)&&budget>0&&cpm>0&&ctr>0&&cvr>0&&aov>0;
+  const hasCore = [budget, cpm, ctr, cvr, aov].every(v => !isNaN(v) && v > 0);
 
   if (!hasCore) {
     hint.style.display = 'block';
@@ -1002,30 +1381,28 @@ function calcMeta() {
   hint.style.display = 'none';
 
   const impressions = (budget / cpm) * 1000;
-  const reach       = !isNaN(freq)&&freq>0 ? impressions / freq : NaN;
+  const reach       = !isNaN(freq) && freq > 0 ? impressions / freq : NaN;
   const clicks      = impressions * (ctr / 100);
   const cpc_calc    = cpm / (ctr * 10);
   const orders      = clicks * (cvr / 100);
   const revenue     = orders * aov;
   const roas        = revenue / budget;
   const cpa         = budget / orders;
-  const beRoas      = !isNaN(margin)&&margin>0 ? 1 / (margin/100) : NaN;
-  const grossProfit = !isNaN(margin) ? (revenue * margin/100) - budget : NaN;
-  const netRev      = !isNaN(returnRate)&&returnRate>0 ? revenue * (1 - returnRate/100) : revenue;
+  const { beRoas, grossProfit, netRev } = economics(revenue, budget, margin, returnRate);
   const ecpm        = (budget / impressions) * 1000;
 
   setV('m-impr',    fmtN(impressions, 0));
   setV('m-reach',   isNaN(reach) ? '— (enter Frequency)' : fmtN(reach, 0));
   setV('m-clicks',  fmtN(clicks, 0));
-  setV('m-cpc',     fmtRs(cpc_calc, 2));
+  setV('m-cpc',     fmtMoney(cpc_calc, 2));
   setV('m-orders',  fmtN(orders, 0), 'hi');
-  setV('m-revenue', fmtRs(revenue), 'hi');
-  setV('m-roas',    fmtX(roas), roas >= (isNaN(beRoas)?2:beRoas) ? 'warn' : 'danger');
-  setV('m-cpa',     fmtRs(cpa));
-  setV('m-be-roas', isNaN(beRoas) ? '— (enter margin)' : fmtX(beRoas) + ' (min)', 'info');
-  setV('m-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtRs(grossProfit), grossProfit>=0?'hi':'danger');
-  setV('m-net-rev', fmtRs(netRev));
-  setV('m-ecpm',    fmtRs(ecpm, 2));
+  setV('m-revenue', fmtMoney(revenue), 'hi');
+  setV('m-roas',    fmtX(roas), roasClass(roas, beRoas));
+  setV('m-cpa',     fmtMoney(cpa));
+  setV('m-be-roas', isNaN(beRoas) ? '— (enter margin > 0)' : fmtX(beRoas) + ' (min)', 'info');
+  setV('m-profit',  isNaN(grossProfit) ? '— (enter margin)' : fmtMoney(grossProfit), grossProfit >= 0 ? 'hi' : 'danger');
+  setV('m-net-rev', fmtMoney(netRev));
+  setV('m-ecpm',    fmtMoney(ecpm, 2));
 
   // Hook Rate
   if (!isNaN(hook)) {
@@ -1034,37 +1411,25 @@ function calcMeta() {
   } else { setV('m-hook-kpi', '— (enter Hook Rate)'); }
 
   // KPI Health
-  setBadge('m-kpi-cpm',  fmtRs(cpm),        badge(cpm>=80&&cpm<=200, (cpm<80)||(cpm>200&&cpm<=280)));
-  setBadge('m-kpi-ctr',  fmtPct(ctr),        badge(ctr>=1.5&&ctr<=3,  ctr>=0.8&&ctr<1.5));
-  if (!isNaN(freq)) setBadge('m-kpi-freq', freq.toFixed(1)+'x', badge(freq>=1.5&&freq<=3.5, (freq<1.5)||(freq>3.5&&freq<=5)));
+  setBadge('m-kpi-cpm',  fmtMoney(cpm),        badge(cpm >= 80 && cpm <= 200, (cpm < 80) || (cpm > 200 && cpm <= 280)));
+  setBadge('m-kpi-ctr',  fmtPct(ctr),        badge(ctr >= 1.5 && ctr <= 3, ctr >= 0.8 && ctr < 1.5));
+  if (!isNaN(freq)) setBadge('m-kpi-freq', freq.toFixed(1) + 'x', badge(freq >= 1.5 && freq <= 3.5, (freq < 1.5) || (freq > 3.5 && freq <= 5)));
   else setV('m-kpi-freq', '—');
   if (!isNaN(beRoas)) {
     const profitable = roas >= beRoas * 1.3;
     const brk = roas >= beRoas;
-    setBadge('m-kpi-roas', fmtX(roas)+' vs BE '+fmtX(beRoas), badge(profitable, brk&&!profitable));
+    setBadge('m-kpi-roas', fmtX(roas) + ' vs BE ' + fmtX(beRoas), badge(profitable, brk && !profitable));
   } else { setV('m-kpi-roas', '—'); }
-  setBadge('m-kpi-cvr', fmtPct(cvr), badge(cvr>=1.6&&cvr<=3, cvr>=0.8&&cvr<1.6));
+  setBadge('m-kpi-cvr', fmtPct(cvr), badge(cvr >= 1.6 && cvr <= 3, cvr >= 0.8 && cvr < 1.6));
 
-  // 3-Scenario
+  // 3-Scenario Stress Test
   const mSc = (cpmMul, cvrMul) => {
-    const impr = (budget/(cpm*cpmMul))*1000;
-    const ord  = impr*(ctr/100)*(cvr*cvrMul/100);
-    const r    = (ord*aov)/budget;
-    return { cpm:cpm*cpmMul, cvr:cvr*cvrMul, orders:ord, roas:r };
+    const impr = (budget / (cpm * cpmMul)) * 1000;
+    const ord  = impr * (ctr / 100) * (cvr * cvrMul / 100);
+    const r    = (ord * aov) / budget;
+    return { cpm: cpm * cpmMul, cvr: cvr * cvrMul, orders: ord, roas: r };
   };
-  const mc = mSc(1.2,0.8), mb = mSc(1,1), mo = mSc(0.85,1.2);
-  document.getElementById('ms-cpm-c').textContent  = fmtRs(mc.cpm);
-  document.getElementById('ms-cvr-c').textContent  = fmtPct(mc.cvr);
-  document.getElementById('ms-ord-c').textContent  = fmtN(mc.orders,0);
-  document.getElementById('ms-roas-c').textContent = fmtX(mc.roas);
-  document.getElementById('ms-cpm-b').textContent  = fmtRs(mb.cpm);
-  document.getElementById('ms-cvr-b').textContent  = fmtPct(mb.cvr);
-  document.getElementById('ms-ord-b').textContent  = fmtN(mb.orders,0);
-  document.getElementById('ms-roas-b').textContent = fmtX(mb.roas);
-  document.getElementById('ms-cpm-o').textContent  = fmtRs(mo.cpm);
-  document.getElementById('ms-cvr-o').textContent  = fmtPct(mo.cvr);
-  document.getElementById('ms-ord-o').textContent  = fmtN(mo.orders,0);
-  document.getElementById('ms-roas-o').textContent = fmtX(mo.roas);
+  renderScenarios('ms', 'cpm', [['c', mSc(1.2, 0.8)], ['b', mSc(1, 1)], ['o', mSc(0.85, 1.2)]]);
 }
 
 function resetMeta() {
@@ -1086,12 +1451,13 @@ function loadMetaEx() {
 //  UNIVERSAL
 // ══════════════════════════════════════════════
 function calcUniversal() {
+  saveState();
   // ── Break-even ROAS ──
   const aov      = f('u-aov');
-  const margin   = f('u-margin');
+  const margin   = clampOr(f('u-margin'), 0, 100);
   const shipping = f('u-shipping');
-  const gateway  = f('u-gateway');
-  const retRate  = f('u-return');
+  const gateway  = clampOr(f('u-gateway'), 0, 100);
+  const retRate  = clampOr(f('u-return'), 0, 100);
 
   if (!isNaN(aov) && !isNaN(margin) && aov>0 && margin>0) {
     const grossProfit = aov * (margin/100);
@@ -1104,9 +1470,9 @@ function calcUniversal() {
     const targetRoas  = !isNaN(beRoas) ? beRoas * 1.3 : NaN;
 
     setV('u-be-roas',     isNaN(beRoas)    ? '—' : fmtX(beRoas), 'warn');
-    setV('u-max-cpa',     isNaN(maxCpa)    ? '—' : fmtRs(maxCpa, 0));
+    setV('u-max-cpa',     isNaN(maxCpa)    ? '—' : fmtMoney(maxCpa, 0));
     setV('u-target-roas', isNaN(targetRoas) ? '—' : fmtX(targetRoas), 'hi');
-    setV('u-cm',          isNaN(cm)        ? '—' : fmtRs(cm, 0), cm>0?'hi':'danger');
+    setV('u-cm',          isNaN(cm)        ? '—' : fmtMoney(cm, 0), cm>0?'hi':'danger');
   } else {
     ['u-be-roas','u-max-cpa','u-target-roas','u-cm'].forEach(id => setV(id,'—'));
   }
@@ -1122,7 +1488,7 @@ function calcUniversal() {
     const blendedRoas = totalSpend > 0 ? totalRev / totalSpend : NaN;
     const merPct      = totalSpend > 0 ? (totalSpend / totalRev) * 100 : NaN;
 
-    setV('u-total-spend',  totalSpend > 0 ? fmtRs(totalSpend) : '—');
+    setV('u-total-spend',  totalSpend > 0 ? fmtMoney(totalSpend) : '—');
     setV('u-blended-roas', isNaN(blendedRoas) ? '—' : fmtX(blendedRoas), 'warn');
     setV('u-mer-pct',      isNaN(merPct) ? '—' : fmtPct(merPct, 1));
     if (!isNaN(blendedRoas)) {
@@ -1146,11 +1512,11 @@ function calcUniversal() {
     const newRoas = !isNaN(newAov)&&!isNaN(aovSpend)&&aovSpend>0 ? newRev / aovSpend : NaN;
     const extraRev = !isNaN(newRev) ? newRev - curRev : NaN;
 
-    setV('u-cur-rev',   fmtRs(curRev));
-    setV('u-new-rev',   isNaN(newRev)   ? '— (enter Target AOV)' : fmtRs(newRev), 'hi');
+    setV('u-cur-rev',   fmtMoney(curRev));
+    setV('u-new-rev',   isNaN(newRev)   ? '— (enter Target AOV)' : fmtMoney(newRev), 'hi');
     setV('u-cur-roas',  isNaN(curRoas)  ? '— (enter Ad Spend)'   : fmtX(curRoas), 'warn');
     setV('u-new-roas',  isNaN(newRoas)  ? '— (enter Target AOV)' : fmtX(newRoas), 'hi');
-    setV('u-extra-rev', isNaN(extraRev) ? '—'                    : fmtRs(extraRev), 'hi');
+    setV('u-extra-rev', isNaN(extraRev) ? '—'                    : fmtMoney(extraRev), 'hi');
   } else {
     ['u-cur-rev','u-new-rev','u-cur-roas','u-new-roas','u-extra-rev'].forEach(id => setV(id,'—'));
   }
@@ -1162,6 +1528,25 @@ function resetUniversal() {
    'u-cur-aov','u-new-aov','u-aov-spend','u-aov-orders']
    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   calcUniversal();
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+function init() {
+  restoreCurrency();
+  const saved = readSavedState();
+  if (saved && CURRENCIES[saved.__cur]) DISPLAY_CUR = saved.__cur;
+  ['tab-google', 'tab-meta', 'tab-universal'].forEach(id => markCurrencyNodes(document.getElementById(id)));
+  populateCurrencySelects();
+  applyCurrencySymbols();
+  enhanceA11y();
+  restoreState();
+  calcGoogle();
+  calcMeta();
+  calcUniversal();
+  calcFx();
+  initRates();
 }
 
 function loadUniEx() {
@@ -1177,6 +1562,9 @@ function loadUniEx() {
   setField('u-aov-spend','100000'); setField('u-aov-orders','280');
   calcUniversal();
 }
+
+// Boot: add accessibility names, restore the last saved plan, render it.
+init();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a00b82b75f3bc1ae',t:'MTc3OTYxNzQyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
