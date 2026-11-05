@@ -1,0 +1,13 @@
+{
+  "name": "planrpro-admetrics-ecom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PlanrPro AdMetrics — e-commerce media planning calculator (single-file PWA). No build step; this manifest exists only to run the formula tests.",
+  "scripts": {
+    "test": "node tests/smoke.test.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.0"
+  }
+}
