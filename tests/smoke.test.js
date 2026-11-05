@@ -15,16 +15,21 @@ const FILE = path.join(__dirname, '..', 'index.html');
 const html = fs.readFileSync(FILE, 'utf8');
 const STORE_KEY = 'planrpro.admetrics.ecom.inputs.v1';
 
-function boot(seed) {
+function boot(seeds) {
   return new JSDOM(html, {
     runScripts: 'dangerously',
     pretendToBeVisual: true,
     url: 'http://localhost/',
     beforeParse(w) {
-      if (seed) { try { w.localStorage.setItem(STORE_KEY, seed); } catch (e) {} }
+      Object.keys(seeds || {}).forEach(k => {
+        try { w.localStorage.setItem(k, seeds[k]); } catch (e) {}
+      });
     },
   });
 }
+
+const RATE_CACHE_KEY = 'planrpro.admetrics.ecom.rates.v1';
+const CUR_STORE_KEY = 'planrpro.admetrics.ecom.currency.v1';
 
 let pass = 0, fail = 0;
 function eq(label, actual, expected) {
@@ -114,7 +119,7 @@ w.loadGoogleEx();
 const saved = w.localStorage.getItem(STORE_KEY);
 eq('state saved on every recalc',                 JSON.parse(saved)['g-budget'], '100000');
 eq('state spans all tabs',                        JSON.parse(saved)['u-aov'], '1800');
-const w2 = boot(saved).window;
+const w2 = boot({ [STORE_KEY]: saved }).window;
 eq('inputs restored after reload',                w2.document.getElementById('g-budget').value, '100000');
 eq('results re-rendered after reload',
    w2.document.getElementById('g-revenue').textContent.trim(), '₹3,20,000');
@@ -128,5 +133,94 @@ eq('decimal inputs are not step-locked to integers', $('g-cvr').getAttribute('st
 eq('no Cloudflare save-page snippet left behind',  /cdn-cgi\/challenge-platform/.test(html) ? 'present' : 'gone', 'gone');
 eq('no dead setRow helper left behind',            /setRow/.test(html) ? 'present' : 'gone', 'gone');
 
-console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail ? 1 : 0);
+// ─────────────────────────────────────────────────────────────
+// ── CURRENCY: display currency, conversion, converter, live/offline rates ──
+// ─────────────────────────────────────────────────────────────
+(async () => {
+  w.loadGoogleEx();
+
+  eq('currency defaults to INR via header select', $('cur-select').value, 'INR');
+  eq('label rupees are marked for swapping',
+     w.document.querySelectorAll('#tab-google .cur-mark, #tab-universal .cur-mark').length > 0 ? 'yes' : 'no', 'yes');
+  eq('Learn tab keeps literal rupees (India-specific examples)',
+     w.document.querySelectorAll('#tab-learn .cur-mark').length, 0);
+  eq('rates fall back to the bundled table when no fetch exists',
+     $('fx-status').className, 'fx-status offline');
+
+  w.setCurrency('USD');
+  eq('budget re-expressed in USD',            $('g-budget').value, '1199.0408'); // 100000 ÷ 83.40 (bundled)
+  eq('cpc re-expressed in USD',               $('g-cpc').value, '0.21582734');  // 18 ÷ 83.40
+  eq('aov re-expressed in USD',               $('g-aov').value, '21.582734');    // 1800 ÷ 83.40
+  eq('percentages are NOT converted',         $('g-ctr').value, '5.5');
+  eq('quality score is NOT converted',        $('g-qs').value, '7');
+  eq('plan value survives the switch (roas)', txt('g-roas'), '3.20x');
+  eq('outputs switch symbol',                 txt('g-revenue').charAt(0), '$');
+  eq('label symbols switch too',
+     w.document.querySelector('#tab-google .cur-mark').textContent, '$');
+  eq('header select reflects the change',     $('cur-select').value, 'USD');
+
+  w.setCurrency('INR');
+  eq('round-trips back to the original budget', $('g-budget').value, '100000');
+  eq('round-trips back to the original revenue', txt('g-revenue'), '₹3,20,000');
+
+  // converter card
+  $('fx-amount').value = '100000';
+  $('fx-from').value = 'INR'; $('fx-to').value = 'USD';
+  w.calcFx();
+  eq('converter output (bundled rate)',  txt('fx-result'), '$1,199.04');
+  eq('converter shows the rate used',    /^1 INR = \$0\.0120 · bundled estimate$/.test(txt('fx-rate-line')) ? 'ok' : txt('fx-rate-line'), 'ok');
+  w.swapFx();
+  eq('swap keeps the amount, flips the pair', txt('fx-result'), '₹83,40,000.00');
+  eq('swap flips the selects', [$('fx-from').value, $('fx-to').value].join('>'), 'USD>INR');
+
+  // live rates via a stubbed endpoint
+  w.fetch = () => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({
+      result: 'success',
+      rates: { INR: 1, USD: 0.012, EUR: 0.0111, GBP: 0.00947, AED: 0.0439, SGD: 0.0161, AUD: 0.0184, CAD: 0.0168 },
+    }),
+  });
+  await w.refreshRates();
+  eq('live fetch switches the status pill', $('fx-status').className, 'fx-status live');
+  eq('status quotes a live USD rate', /1 USD = ₹83\.33/.test(txt('fx-status')) ? 'ok' : txt('fx-status'), 'ok');
+  $('fx-from').value = 'INR'; $('fx-to').value = 'USD';
+  w.calcFx();
+  eq('converter now uses the live rate',   txt('fx-result'), '$1,200.00');       // 100000 × 0.012
+  eq('rate line says live',                /· live rate$/.test(txt('fx-rate-line')) ? 'ok' : txt('fx-rate-line'), 'ok');
+  eq('live rates are cached',              w.localStorage.getItem(RATE_CACHE_KEY) ? 'yes' : 'no', 'yes');
+
+  // a failed endpoint must degrade, not break
+  const wOff = boot({}).window;
+  wOff.fetch = () => Promise.reject(new Error('blocked'));
+  await wOff.refreshRates();
+  eq('blocked FX API keeps the app on bundled rates',
+     wOff.document.getElementById('fx-status').className, 'fx-status offline');
+  wOff.document.getElementById('fx-amount').value = '100000';
+  wOff.calcFx();
+  eq('converter still works offline',
+     wOff.document.getElementById('fx-result').textContent.trim(), '$1,199.04');
+
+  // cached rates are reused on the next visit (no network needed)
+  const cached = w.localStorage.getItem(RATE_CACHE_KEY);
+  const wCache = boot({ [RATE_CACHE_KEY]: cached }).window;
+  eq('fresh load reuses the cached live rate',
+     wCache.document.getElementById('fx-status').className, 'fx-status live');
+
+  // display currency persists across reloads, together with the plan it belongs to
+  w.loadGoogleEx();
+  w.setCurrency('USD');
+  const usdState = w.localStorage.getItem(STORE_KEY);
+  eq('saved plan records its currency', JSON.parse(usdState).__cur, 'USD');
+  const wCur = boot({ [STORE_KEY]: usdState }).window;
+  eq('display currency persists across reloads',
+     wCur.document.getElementById('cur-select').value, 'USD');
+  eq('restored currency formats outputs in USD',
+     wCur.document.getElementById('g-revenue').textContent.charAt(0), '$');
+  // the stubbed live rate is 1/0.012 = 83.3333, hence 100000 ÷ 83.3333 = 1200
+  eq('restored budget kept the USD amount, converted at the live rate',
+     wCur.document.getElementById('g-budget').value, '1200');
+
+  console.log(`\n${pass} passed, ${fail} failed`);
+  process.exit(fail ? 1 : 0);
+})();
